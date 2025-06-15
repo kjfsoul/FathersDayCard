@@ -90,6 +90,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Function to increment user stats
+CREATE OR REPLACE FUNCTION increment_user_stats(
+  user_id UUID,
+  games_played_increment INTEGER DEFAULT 0,
+  score_increment INTEGER DEFAULT 0
+)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE users 
+  SET 
+    games_played = games_played + games_played_increment,
+    total_score = total_score + score_increment
+  WHERE id = user_id;
+  
+  -- Create user record if it doesn't exist
+  IF NOT FOUND THEN
+    INSERT INTO users (id, email, games_played, total_score)
+    VALUES (user_id, '', games_played_increment, score_increment)
+    ON CONFLICT (id) DO UPDATE SET
+      games_played = users.games_played + games_played_increment,
+      total_score = users.total_score + score_increment;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Row Level Security (RLS) policies
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE father_cards ENABLE ROW LEVEL SECURITY;
