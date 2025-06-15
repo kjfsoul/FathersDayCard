@@ -1,0 +1,71 @@
+Dashboard prompt (public/index.html + public/style.css)
+Replace public/index.html and public/style.css with a responsive dashboard:
+Header = “🎉 Happy Father’s Day, <span id="dadName">Dad</span>!” + name input.
+Grid of 5 tiles linking to card & 4 games.
+JavaScript inline: stores dadName in localStorage + updates spans.
+CSS: pastel theme, 3-column grid on desktop, 1-column on mobile.
+Output both files in fenced code blocks.
+
+2️⃣ Animated card prompt (public/card.html)
+Overwrite public/card.html.
+Requirements
+• embed a <lottie-player> referencing MY_CARD.json (placeholder).
+• h2 message content-editable, includes <span id="dadName">.
+• “Share ♡” button → navigator.share fallback alert.
+• On DOM load inject dadName from localStorage.
+Deliver full HTML; inline minimal CSS if needed.
+
+3️⃣ Emoji-Match prompt (emoji-match.html + JS)
+Replace public/games/emoji-match.html and src/emoji-match.js.
+Game rules: board 5 × 5 emojis; choose target emoji at top; click matching emojis to clear; when none remain → alert “You cleared them all!”.
+Board/grid CSS; import ../src/emoji-match.js. Provide both files.
+
+4️⃣ Emoji-Memory prompt
+Supply public/games/emoji-memory.html + src/emoji-memory.js.
+Vanilla JS memory flip-pair with 6 emoji pairs (12 cards).
+No dependencies. Lightweight CSS grid. When all pairs matched → alert.
+
+5️⃣ Catch-Ball prompt
+Provide public/games/catch-ball.html & src/catch-ball.js.
+Canvas 100 vh × 400 px. Orange ball bounces; paddle at mouse X bottom; collide adds 1 to score; miss ⇒ Game Over reset.
+Simple style tag for center alignment.
+
+6️⃣ Trivia prompt (HTML + JS + SQL)
+❶ Replace public/games/trivia.html and src/trivia.js.
+❷ Return a Supabase SQL snippet to create trivia_questions table plus random_trivia(cat) function.
+❸ JS must:
+– import Supabase client via ES module CDN
+– call random_trivia('general') • render Q + buttons
+– correct alert vs wrong alert
+– “Next question” button after answer
+Embed all pieces in separate fenced blocks: HTML, JS, SQL.
+
+7️⃣ Edge Function cron prompt
+Draft a Supabase Edge Function (update-trivia.ts) that fetches a public Google-Sheet CSV of trivia questions, upserts into trivia_questions, runs on cron "0 */8 * * *".
+Include .env.sample keys, and brief deploy instructions.
+
+8️⃣ Netlify config prompt
+Give minimal netlify.toml: publish public, no build step.
+Also output a one-liner for README “Deploy to Netlify” badge.
+
+9️⃣ Global footer + analytics prompt
+Update public/index.html footer:
+• “🎁 Build Your Own” → https://birthdaygen.com/waitlist
+• Insert Supabase analytics snippet after </body> across all pages (simple insert into analytics table).
+Provide delta patch instructions or full HTML replacements.
+
+How to run the prompt chain
+Open ChatGPT-4o / Claude-Max / Gemini Advanced.
+
+Paste step 0 → copy outputs into repo.
+
+Paste step 1 → overwrite files.
+
+Continue through step 9.
+
+Push repo → GitHub → Netlify “New Site from Git”.
+
+In Supabase: run SQL, add Edge Function, grab public keys, paste into src/trivia.js.
+
+Export Dad-card Lottie from Canva → place in public/MY_CARD.json.
+
