@@ -1,24 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { EmojiMatchGame } from './games/emoji-match-game';
+import { MemoryGame } from './games/memory-game';
+import { TriviaGame } from './games/trivia-game';
+import { CatchBallGame } from './games/catch-ball-game';
+import { supabase } from '@/lib/supabase';
 
 interface GameModalProps {
   isOpen: boolean;
   gameTitle: string;
-  currentScore: number;
-  gameTime: string;
+  gameId: string;
   onClose: () => void;
-  onPause: () => void;
-  onRestart: () => void;
+  userId?: string;
 }
 
 export function GameModal({
   isOpen,
   gameTitle,
-  currentScore,
-  gameTime,
+  gameId,
   onClose,
-  onPause,
-  onRestart
+  userId
 }: GameModalProps) {
+  const [currentScore, setCurrentScore] = useState(0);
+  const [gameStartTime] = useState(Date.now());
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -29,6 +33,59 @@ export function GameModal({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
+
+  const handleGameEnd = async (finalScore: number) => {
+    setCurrentScore(finalScore);
+    
+    // Save game session to Supabase
+    if (userId) {
+      try {
+        const duration = Math.floor((Date.now() - gameStartTime) / 1000);
+        await supabase.from('game_sessions').insert({
+          user_id: userId,
+          game_type: gameId as 'emoji-match' | 'emoji-memory' | 'trivia' | 'catch-ball',
+          score: finalScore,
+          duration_seconds: duration,
+          completed: true
+        });
+
+        // Update user stats
+        await supabase.rpc('increment_user_stats', {
+          user_id: userId,
+          games_played_increment: 1,
+          score_increment: finalScore
+        });
+      } catch (error) {
+        console.error('Error saving game session:', error);
+      }
+    }
+
+    // Close modal after showing score briefly
+    setTimeout(() => {
+      onClose();
+    }, 3000);
+  };
+
+  const renderGame = () => {
+    switch (gameId) {
+      case 'emoji-match':
+        return <EmojiMatchGame onGameEnd={handleGameEnd} />;
+      case 'emoji-memory':
+        return <MemoryGame onGameEnd={handleGameEnd} />;
+      case 'trivia':
+        return <TriviaGame onGameEnd={handleGameEnd} />;
+      case 'catch-ball':
+        return <CatchBallGame onGameEnd={handleGameEnd} />;
+      default:
+        return (
+          <div className="text-center text-muted-foreground">
+            <div className="text-6xl mb-4">🎮</div>
+            <h4 className="text-xl mb-4">{gameTitle}</h4>
+            <p className="mb-6">Game not implemented yet</p>
+          </div>
+        );
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -41,53 +98,21 @@ export function GameModal({
         }
       }}
     >
-      <div className="bg-dark-slate rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border-2 border-neon-teal">
+      <div className="bg-card rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-auto border border-border">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-charcoal">
-          <h3 className="font-arcade text-lg text-neon-teal">{gameTitle}</h3>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="font-arcade text-lg text-foreground">{gameTitle}</h3>
           <button 
-            className="text-gray-400 hover:text-white text-xl"
+            className="text-muted-foreground hover:text-foreground text-xl"
             onClick={onClose}
           >
-            <i className="fas fa-times"></i>
+            ✕
           </button>
         </div>
         
         {/* Game Content Area */}
-        <div className="p-6 h-96 flex items-center justify-center">
-          <div className="text-center text-gray-400">
-            <i className="fas fa-gamepad text-6xl text-neon-teal mb-4 animate-neon-glow"></i>
-            <h4 className="font-arcade text-xl text-arcade-orange mb-4">{gameTitle}</h4>
-            <p className="text-gray-300 mb-6">Game implementation will be loaded here</p>
-            <button className="arcade-btn bg-arcade-orange hover:bg-arcade-orange/80 px-6 py-3 rounded-xl text-white font-arcade">
-              COMING SOON
-            </button>
-          </div>
-        </div>
-        
-        {/* Game Controls */}
-        <div className="p-4 border-t border-charcoal bg-charcoal/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 text-sm">
-              <span className="text-gray-400">Score: <span className="text-golden-yellow font-arcade">{currentScore}</span></span>
-              <span className="text-gray-400">Time: <span className="text-neon-teal font-arcade">{gameTime}</span></span>
-            </div>
-            
-            <div className="flex space-x-2">
-              <button 
-                className="arcade-btn bg-father-blue hover:bg-father-blue/80 px-4 py-2 rounded text-sm"
-                onClick={onPause}
-              >
-                <i className="fas fa-pause mr-1"></i>Pause
-              </button>
-              <button 
-                className="arcade-btn bg-arcade-orange hover:bg-arcade-orange/80 px-4 py-2 rounded text-sm"
-                onClick={onRestart}
-              >
-                <i className="fas fa-redo mr-1"></i>Restart
-              </button>
-            </div>
-          </div>
+        <div className="p-6 min-h-[400px]">
+          {renderGame()}
         </div>
       </div>
     </div>

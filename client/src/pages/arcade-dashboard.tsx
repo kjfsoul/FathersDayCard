@@ -3,12 +3,11 @@ import { ArcadeHeader } from '@/components/arcade-header';
 import { GameCard } from '@/components/game-card';
 import { GameModal } from '@/components/game-modal';
 import { StatsSection } from '@/components/stats-section';
+import { User } from '@supabase/supabase-js';
 
-export default function ArcadeDashboard() {
+export default function ArcadeDashboard({ user }: { user?: User }) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
-  const [currentScore, setCurrentScore] = useState(0);
-  const [gameTime, setGameTime] = useState('00:00');
 
   // Game state
   const highScores = {
@@ -90,24 +89,10 @@ export default function ArcadeDashboard() {
 
   const handleGameSelect = (gameId: string) => {
     setSelectedGame(gameId);
-    setCurrentScore(0);
-    setGameTime('00:00');
   };
 
   const handleCloseGame = () => {
     setSelectedGame(null);
-  };
-
-  const handlePauseGame = () => {
-    // TODO: Implement pause functionality
-    console.log('Pause game');
-  };
-
-  const handleRestartGame = () => {
-    // TODO: Implement restart functionality
-    setCurrentScore(0);
-    setGameTime('00:00');
-    console.log('Restart game');
   };
 
   const getGameTitle = (gameId: string | null) => {
@@ -204,11 +189,9 @@ export default function ArcadeDashboard() {
       <GameModal
         isOpen={selectedGame !== null}
         gameTitle={getGameTitle(selectedGame)}
-        currentScore={currentScore}
-        gameTime={gameTime}
+        gameId={selectedGame || ''}
         onClose={handleCloseGame}
-        onPause={handlePauseGame}
-        onRestart={handleRestartGame}
+        userId={user?.id}
       />
     </div>
   );
