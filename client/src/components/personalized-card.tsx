@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { DadInfo } from './dad-questionnaire';
+import { ShareCard } from './share-card';
 
 interface PersonalizedCardProps {
   dadInfo: DadInfo;
@@ -205,6 +206,19 @@ export function PersonalizedCard({ dadInfo, onOpenGift }: PersonalizedCardProps)
                   ❤️
                 </motion.span>
               ))}
+            </motion.div>
+
+            {/* Share Card Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.8 }}
+              className="mb-6"
+            >
+              <ShareCard 
+                cardTitle="Father's Day Card"
+                dadName={dadInfo.name}
+              />
             </motion.div>
 
             {/* Open Gift Button */}
