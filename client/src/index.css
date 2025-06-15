@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Arcade Theme Colors */
+  --arcade-orange: hsl(15, 100%, 60%);
+  --neon-teal: hsl(174, 58%, 58%);
+  --father-blue: hsl(203, 71%, 56%);
+  --mint-green: hsl(147, 35%, 70%);
+  --golden-yellow: hsl(48, 89%, 80%);
+  --retro-purple: hsl(300, 47%, 75%);
+  --dark-slate: hsl(210, 29%, 24%);
+  --charcoal: hsl(210, 22%, 30%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+/* Arcade Theme Styles */
+.font-arcade {
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.4;
+}
+
+.retro-grid {
+  background-image: 
+    linear-gradient(rgba(78, 205, 196, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(78, 205, 196, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.arcade-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.arcade-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.arcade-btn:hover::before {
+  left: 100%;
+}
+
+.game-card {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+/* Custom Animations */
+@keyframes neon-glow {
+  0% { 
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  }
+  100% { 
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px);
+  }
+  50% { 
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pixel-fade {
+  0% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-neon-glow {
+  animation: neon-glow 2s ease-in-out infinite alternate;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pixel-fade {
+  animation: pixel-fade 0.3s ease-in-out;
+}
+
+/* Custom Color Classes */
+.text-arcade-orange { color: var(--arcade-orange); }
+.text-neon-teal { color: var(--neon-teal); }
+.text-father-blue { color: var(--father-blue); }
+.text-mint-green { color: var(--mint-green); }
+.text-golden-yellow { color: var(--golden-yellow); }
+.text-retro-purple { color: var(--retro-purple); }
+.text-dark-slate { color: var(--dark-slate); }
+.text-charcoal { color: var(--charcoal); }
+
+.bg-arcade-orange { background-color: var(--arcade-orange); }
+.bg-neon-teal { background-color: var(--neon-teal); }
+.bg-father-blue { background-color: var(--father-blue); }
+.bg-mint-green { background-color: var(--mint-green); }
+.bg-golden-yellow { background-color: var(--golden-yellow); }
+.bg-retro-purple { background-color: var(--retro-purple); }
+.bg-dark-slate { background-color: var(--dark-slate); }
+.bg-charcoal { background-color: var(--charcoal); }
+
+.border-arcade-orange { border-color: var(--arcade-orange); }
+.border-neon-teal { border-color: var(--neon-teal); }
+.border-father-blue { border-color: var(--father-blue); }
+.border-mint-green { border-color: var(--mint-green); }
+.border-golden-yellow { border-color: var(--golden-yellow); }
+.border-retro-purple { border-color: var(--retro-purple); }
+
+/* Hover variants */
+.hover\:bg-arcade-orange\/80:hover { background-color: hsl(15, 100%, 60%, 0.8); }
+.hover\:bg-father-blue\/80:hover { background-color: hsl(203, 71%, 56%, 0.8); }
+.hover\:bg-mint-green\/80:hover { background-color: hsl(147, 35%, 70%, 0.8); }
+.hover\:bg-retro-purple\/80:hover { background-color: hsl(300, 47%, 75%, 0.8); }
+
+.hover\:border-neon-teal:hover { border-color: var(--neon-teal); }
+.hover\:border-father-blue:hover { border-color: var(--father-blue); }
+.hover\:border-mint-green:hover { border-color: var(--mint-green); }
+.hover\:border-retro-purple:hover { border-color: var(--retro-purple); }
+
+/* Opacity variants */
+.bg-mint-green\/20 { background-color: hsl(147, 35%, 70%, 0.2); }
+.bg-retro-purple\/20 { background-color: hsl(300, 47%, 75%, 0.2); }
+.bg-arcade-orange\/20 { background-color: hsl(15, 100%, 60%, 0.2); }
+.bg-neon-teal\/20 { background-color: hsl(174, 58%, 58%, 0.2); }
+.bg-charcoal\/50 { background-color: hsl(210, 22%, 30%, 0.5); }
+.bg-charcoal\/30 { background-color: hsl(210, 22%, 30%, 0.3); }
+.bg-dark-slate\/90 { background-color: hsl(210, 29%, 24%, 0.9); }
+.bg-dark-slate\/50 { background-color: hsl(210, 29%, 24%, 0.5); }
+
+.border-neon-teal\/30 { border-color: hsl(174, 58%, 58%, 0.3); }
+.border-father-blue\/30 { border-color: hsl(203, 71%, 56%, 0.3); }
+.border-mint-green\/30 { border-color: hsl(147, 35%, 70%, 0.3); }
+.border-retro-purple\/30 { border-color: hsl(300, 47%, 75%, 0.3); }
