@@ -4,10 +4,10 @@ const supabaseUrl = 'https://pezchazchhnmygpdgzma.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseAnonKey) {
-  console.warn('VITE_SUPABASE_ANON_KEY environment variable is missing. Please add your Supabase anon key to enable authentication.')
+  throw new Error('VITE_SUPABASE_ANON_KEY environment variable is missing')
 }
 
-export const supabase = supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export type Database = {
   public: {

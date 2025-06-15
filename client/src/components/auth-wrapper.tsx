@@ -20,11 +20,6 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
