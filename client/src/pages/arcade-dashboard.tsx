@@ -3,6 +3,8 @@ import { ArcadeHeader } from '@/components/arcade-header';
 import { GameCard } from '@/components/game-card';
 import { GameModal } from '@/components/game-modal';
 import { StatsSection } from '@/components/stats-section';
+import { PrivacyNotice } from '@/components/privacy-notice';
+import { ShareCard } from '@/components/share-card';
 import { User } from '@supabase/supabase-js';
 
 export default function ArcadeDashboard({ user }: { user?: User }) {
@@ -165,6 +167,14 @@ export default function ArcadeDashboard({ user }: { user?: User }) {
           winStreak={totalStats.winStreak}
           timeSpent={totalStats.timeSpent}
         />
+
+        {/* Share Section */}
+        <div className="mt-12 max-w-md mx-auto">
+          <ShareCard 
+            cardTitle="Father's Day Arcade"
+            dadName="Dad"
+          />
+        </div>
       </main>
 
       {/* Footer */}
@@ -180,9 +190,13 @@ export default function ArcadeDashboard({ user }: { user?: User }) {
             Made with <i className="fas fa-heart text-red-500"></i> for the best dad ever!
           </p>
           
-          <p className="font-arcade text-xs text-neon-teal">
+          <p className="font-arcade text-xs text-neon-teal mb-3">
             HAPPY FATHER'S DAY 2025
           </p>
+          
+          <div className="flex justify-center">
+            <PrivacyNotice />
+          </div>
         </div>
       </footer>
 

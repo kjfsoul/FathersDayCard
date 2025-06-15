@@ -120,7 +120,7 @@ export function ShareCard({ cardTitle = "Father's Day Card", dadName = "Dad" }: 
 
         <div className="space-y-3">
           {/* Native Web Share API (mobile devices) */}
-          {typeof navigator !== 'undefined' && navigator.share && (
+          {typeof navigator !== 'undefined' && 'share' in navigator && (
             <Button
               onClick={handleWebShare}
               disabled={isSharing}
