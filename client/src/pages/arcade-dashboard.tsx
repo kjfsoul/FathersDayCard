@@ -9,7 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Heart, Mail } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
-export default function ArcadeDashboard({ user }: { user?: User }) {
+interface ArcadeDashboardProps {
+  user?: User;
+  onThankYouCard?: () => void;
+}
+
+export default function ArcadeDashboard({ user, onThankYouCard }: ArcadeDashboardProps) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
 
@@ -170,8 +175,25 @@ export default function ArcadeDashboard({ user }: { user?: User }) {
           timeSpent={totalStats.timeSpent}
         />
 
-        {/* Share Section */}
-        <div className="mt-12 max-w-md mx-auto">
+        {/* Action Buttons Section */}
+        <div className="mt-12 space-y-6 max-w-md mx-auto">
+          {/* Thank You Card Button */}
+          {onThankYouCard && (
+            <div className="text-center">
+              <Button
+                onClick={onThankYouCard}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-8 py-3 text-lg font-semibold rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
+                <Heart className="w-5 h-5 mr-2" />
+                Send Dad a Thank You Card
+              </Button>
+              <p className="text-gray-400 text-sm mt-2">
+                Let Dad know how much you appreciate him!
+              </p>
+            </div>
+          )}
+
+          {/* Share Section */}
           <ShareCard 
             cardTitle="Father's Day Arcade"
             dadName="Dad"

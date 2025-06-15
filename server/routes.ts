@@ -13,7 +13,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: 'OpenAI API key not configured' });
       }
 
-      const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const prompt = `Create a personalized Father's Day card message based on this information about dad:

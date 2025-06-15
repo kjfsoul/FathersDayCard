@@ -20,10 +20,10 @@ import { User } from "@supabase/supabase-js";
 
 type AppStage = 'theme-selection' | 'envelope' | 'questionnaire' | 'animated-card' | 'gift-reveal' | 'arcade-personalizer' | 'arcade' | 'thank-you-card';
 
-function Router({ user }: { user: User }) {
+function Router({ user, onThankYouCard }: { user: User; onThankYouCard?: () => void }) {
   return (
     <Switch>
-      <Route path="/" component={() => <ArcadeDashboard user={user} />} />
+      <Route path="/" component={() => <ArcadeDashboard user={user} onThankYouCard={onThankYouCard} />} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -73,6 +73,10 @@ function AuthenticatedApp({ user }: { user: User }) {
     setCurrentStage('arcade');
   };
 
+  const handleThankYouCardStart = () => {
+    setCurrentStage('thank-you-card');
+  };
+
   const renderCurrentStage = () => {
     switch (currentStage) {
       case 'theme-selection':
@@ -106,7 +110,7 @@ function AuthenticatedApp({ user }: { user: User }) {
       case 'arcade':
         return (
           <SubscriptionGate user={user} feature="unlimited_games">
-            <Router user={user} />
+            <Router user={user} onThankYouCard={handleThankYouCardStart} />
           </SubscriptionGate>
         );
       
