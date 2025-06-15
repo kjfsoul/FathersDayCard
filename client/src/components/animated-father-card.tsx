@@ -217,7 +217,7 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
         </motion.div>
       ))}
 
-      <div className="relative perspective-1000">
+      <div className="relative" style={{ perspective: "1000px" }}>
         <motion.div
           className="w-96 h-80 cursor-pointer"
           style={{ transformStyle: "preserve-3d" }}
@@ -227,7 +227,7 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
         >
           {/* Card Front */}
           <motion.div
-            className="absolute inset-0 backface-hidden rounded-3xl shadow-2xl overflow-hidden"
+            className="absolute inset-0 rounded-3xl shadow-2xl overflow-hidden"
             style={{ 
               background: `linear-gradient(135deg, ${generatedCard.cardTheme.primaryColor}, ${generatedCard.cardTheme.secondaryColor})`,
               backfaceVisibility: "hidden"
@@ -294,7 +294,7 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
 
           {/* Card Inside */}
           <motion.div
-            className="absolute inset-0 backface-hidden rounded-3xl shadow-2xl overflow-hidden bg-white"
+            className="absolute inset-0 rounded-3xl shadow-2xl overflow-hidden bg-white"
             style={{ 
               transform: "rotateY(180deg)",
               backfaceVisibility: "hidden"
