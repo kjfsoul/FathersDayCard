@@ -11,17 +11,16 @@ interface AnimatedFatherCardProps {
 interface GeneratedCard {
   frontMessage: string;
   insideMessage: string;
+  signature: string;
   dadAvatar: string; // SVG string
   cardTheme: {
     primaryColor: string;
     secondaryColor: string;
     accentColor: string;
-    pattern: string;
   };
 }
 
 export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCardProps) {
-  const [isCardOpen, setIsCardOpen] = useState(false);
   const [generatedCard, setGeneratedCard] = useState<GeneratedCard | null>(null);
   const [isGenerating, setIsGenerating] = useState(true);
 
@@ -43,39 +42,38 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
         const card = await response.json();
         setGeneratedCard(card);
       } else {
-        // Fallback card generation
         setGeneratedCard(generateFallbackCard(dadInfo));
       }
     } catch (error) {
       setGeneratedCard(generateFallbackCard(dadInfo));
+    } finally {
+      setIsGenerating(false);
     }
-    
-    setIsGenerating(false);
   };
 
   const generateFallbackCard = (info: DadInfo): GeneratedCard => {
     const themes = {
-      funny: { primaryColor: '#FF6B6B', secondaryColor: '#4ECDC4', accentColor: '#45B7D1', pattern: 'polka-dots' },
-      serious: { primaryColor: '#2C3E50', secondaryColor: '#3498DB', accentColor: '#E74C3C', pattern: 'stripes' },
-      adventurous: { primaryColor: '#E67E22', secondaryColor: '#27AE60', accentColor: '#F39C12', pattern: 'zigzag' },
-      gentle: { primaryColor: '#8E44AD', secondaryColor: '#16A085', accentColor: '#E91E63', pattern: 'hearts' }
+      funny: { primaryColor: '#FF6B6B', secondaryColor: '#4ECDC4', accentColor: '#45B7D1' },
+      serious: { primaryColor: '#2C3E50', secondaryColor: '#3498DB', accentColor: '#E74C3C' },
+      adventurous: { primaryColor: '#E67E22', secondaryColor: '#27AE60', accentColor: '#F39C12' },
+      gentle: { primaryColor: '#8E44AD', secondaryColor: '#16A085', accentColor: '#E91E63' }
     };
 
-    // Generate simple SVG avatar based on dad info
+    const dadName = info.name === 'Dad' ? 'Dad' : info.name;
     const dadAvatar = generateDadAvatar(info);
     
     return {
-      frontMessage: `Happy Father's Day, ${info.name}!`,
-      insideMessage: `Dear ${info.name}, your love for ${info.favoriteHobby} and your ${info.personality} spirit make you the best dad ever! Remember ${info.favoriteMemory}? That's just one of many amazing moments. Your ${info.specialTrait} always brightens our day!`,
+      frontMessage: 'Happy Father\'s Day!',
+      insideMessage: `${dadName}, your ${info.personality} spirit and love for ${info.favoriteHobby} always brightens our days. Your ${info.specialTrait} makes you truly one-of-a-kind, and moments like ${info.favoriteMemory} remind me how lucky we are to have you. Thank you for being an amazing father!`,
+      signature: 'Love, Kevin',
       dadAvatar,
       cardTheme: themes[info.personality]
     };
   };
 
   const generateDadAvatar = (info: DadInfo): string => {
-    // Generate simple cartoon SVG based on personality and traits
-    const baseAvatar = `
-      <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    return `
+      <svg width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="faceGradient" cx="50%" cy="40%" r="60%">
             <stop offset="0%" style="stop-color:#FFE4B5"/>
@@ -84,257 +82,133 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
         </defs>
         
         <!-- Face -->
-        <circle cx="100" cy="100" r="80" fill="url(#faceGradient)" stroke="#8B4513" stroke-width="2"/>
+        <circle cx="100" cy="100" r="75" fill="url(#faceGradient)" stroke="#8B4513" stroke-width="2"/>
         
         <!-- Eyes -->
-        <circle cx="80" cy="85" r="8" fill="#000"/>
-        <circle cx="120" cy="85" r="8" fill="#000"/>
-        <circle cx="82" cy="83" r="3" fill="#FFF"/>
-        <circle cx="122" cy="83" r="3" fill="#FFF"/>
+        <circle cx="80" cy="85" r="6" fill="#333"/>
+        <circle cx="120" cy="85" r="6" fill="#333"/>
+        <circle cx="82" cy="83" r="2" fill="#FFF"/>
+        <circle cx="122" cy="83" r="2" fill="#FFF"/>
         
         <!-- Nose -->
-        <ellipse cx="100" cy="100" rx="4" ry="6" fill="#CD853F"/>
+        <ellipse cx="100" cy="100" rx="3" ry="5" fill="#CD853F"/>
         
         <!-- Mouth -->
-        <path d="M 85 115 Q 100 130 115 115" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 85 115 Q 100 125 115 115" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>
         
-        <!-- Personality-based features -->
-        ${getPersonalityFeatures(info.personality)}
+        <!-- Hair -->
+        <path d="M 40 60 Q 100 30 160 60 Q 150 45 100 35 Q 50 45 40 60" fill="#8B4513"/>
         
-        <!-- Hobby-based accessories -->
-        ${getHobbyAccessories(info.favoriteHobby)}
+        <!-- Glasses (if serious personality) -->
+        ${info.personality === 'serious' ? `
+          <circle cx="80" cy="85" r="15" fill="none" stroke="#333" stroke-width="2"/>
+          <circle cx="120" cy="85" r="15" fill="none" stroke="#333" stroke-width="2"/>
+          <line x1="95" y1="85" x2="105" y2="85" stroke="#333" stroke-width="2"/>
+        ` : ''}
+        
+        <!-- Beard (if adventurous) -->
+        ${info.personality === 'adventurous' ? `
+          <path d="M 70 130 Q 100 145 130 130 Q 125 140 100 142 Q 75 140 70 130" fill="#654321"/>
+        ` : ''}
       </svg>
     `;
-    
-    return baseAvatar;
-  };
-
-  const getPersonalityFeatures = (personality: string): string => {
-    switch (personality) {
-      case 'funny':
-        return `
-          <!-- Funny mustache and eyebrows -->
-          <path d="M 75 105 Q 85 110 95 105 Q 105 110 115 105 Q 125 110 135 105" stroke="#8B4513" stroke-width="4" fill="none"/>
-          <path d="M 70 75 Q 80 70 90 75" stroke="#8B4513" stroke-width="3" fill="none"/>
-          <path d="M 110 75 Q 120 70 130 75" stroke="#8B4513" stroke-width="3" fill="none"/>
-        `;
-      case 'serious':
-        return `
-          <!-- Serious glasses and beard -->
-          <rect x="65" y="80" width="30" height="20" fill="none" stroke="#000" stroke-width="2" rx="5"/>
-          <rect x="105" y="80" width="30" height="20" fill="none" stroke="#000" stroke-width="2" rx="5"/>
-          <line x1="95" y1="90" x2="105" y2="90" stroke="#000" stroke-width="2"/>
-          <path d="M 80 130 Q 100 140 120 130" stroke="#8B4513" stroke-width="6" fill="#8B4513"/>
-        `;
-      case 'adventurous':
-        return `
-          <!-- Adventure hat -->
-          <ellipse cx="100" cy="50" rx="60" ry="15" fill="#D2691E"/>
-          <ellipse cx="100" cy="45" rx="55" ry="20" fill="#8B4513"/>
-          <circle cx="100" cy="45" r="5" fill="#FFD700"/>
-        `;
-      case 'gentle':
-        return `
-          <!-- Gentle smile and kind eyes -->
-          <path d="M 75 80 Q 80 75 85 80" stroke="#8B4513" stroke-width="2" fill="none"/>
-          <path d="M 115 80 Q 120 75 125 80" stroke="#8B4513" stroke-width="2" fill="none"/>
-          <path d="M 85 115 Q 100 125 115 115" stroke="#FF69B4" stroke-width="3" fill="none"/>
-        `;
-      default:
-        return '';
-    }
-  };
-
-  const getHobbyAccessories = (hobby: string): string => {
-    if (hobby.toLowerCase().includes('sport') || hobby.toLowerCase().includes('football') || hobby.toLowerCase().includes('baseball')) {
-      return `<circle cx="150" cy="60" r="12" fill="#8B4513" stroke="#000" stroke-width="1"/>`;
-    } else if (hobby.toLowerCase().includes('music') || hobby.toLowerCase().includes('guitar')) {
-      return `<path d="M 140 50 L 160 50 L 160 80 L 140 80 Z" fill="#8B4513" stroke="#000"/>`;
-    } else if (hobby.toLowerCase().includes('cook') || hobby.toLowerCase().includes('grill')) {
-      return `<rect x="140" y="45" width="20" height="5" fill="#D3D3D3" stroke="#000"/>`;
-    }
-    return '';
   };
 
   if (isGenerating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center">
         <motion.div
-          className="text-center text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          className="text-center"
         >
-          <motion.div
-            className="text-6xl mb-4"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            🎨
-          </motion.div>
-          <h2 className="text-2xl font-bold mb-2">Creating Your Dad's Avatar...</h2>
-          <p className="text-lg opacity-80">Making something special for {dadInfo.name}</p>
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold mb-2 text-gray-800">Creating Your Personalized Card</h2>
+          <p className="text-lg text-gray-600">Adding special touches for {dadInfo.name === 'Dad' ? 'Dad' : dadInfo.name}...</p>
         </motion.div>
       </div>
     );
   }
 
-  if (!generatedCard) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-900 to-pink-900 flex items-center justify-center p-4">
-        <div className="text-center text-white">
-          <h2 className="text-2xl font-bold mb-4">Unable to Generate Card</h2>
-          <Button onClick={generateCard} className="bg-white text-red-900">Try Again</Button>
-        </div>
-      </div>
-    );
-  }
+  if (!generatedCard) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 flex items-center justify-center p-4 overflow-hidden">
-      {/* Floating hearts animation */}
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-2xl text-red-400 opacity-60"
-          initial={{ 
-            x: Math.random() * window.innerWidth, 
-            y: window.innerHeight + 50,
-            scale: 0
-          }}
-          animate={{ 
-            y: -50, 
-            scale: [0, 1, 0],
-            rotate: 360
-          }}
-          transition={{ 
-            duration: 6 + Math.random() * 4,
-            repeat: Infinity,
-            delay: i * 0.5,
-            ease: "easeInOut"
-          }}
-        >
-          ❤️
-        </motion.div>
-      ))}
-
-      <div className="relative" style={{ perspective: "1000px" }}>
-        <motion.div
-          className="w-96 h-80 cursor-pointer"
-          style={{ transformStyle: "preserve-3d" }}
-          animate={{ rotateY: isCardOpen ? 180 : 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-          onClick={() => !isCardOpen && setIsCardOpen(true)}
-        >
-          {/* Card Front */}
-          <motion.div
-            className="absolute inset-0 rounded-3xl shadow-2xl overflow-hidden"
-            style={{ 
-              background: `linear-gradient(135deg, ${generatedCard.cardTheme.primaryColor}, ${generatedCard.cardTheme.secondaryColor})`,
-              backfaceVisibility: "hidden"
-            }}
-          >
-            <div className="h-full flex flex-col items-center justify-center p-8 text-center relative">
-              {/* Decorative pattern */}
-              <div className="absolute inset-0 opacity-20">
-                {generatedCard.cardTheme.pattern === 'hearts' && (
-                  <>
-                    {[...Array(12)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute text-4xl"
-                        style={{
-                          left: `${20 + (i % 4) * 25}%`,
-                          top: `${20 + Math.floor(i / 4) * 25}%`,
-                        }}
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-                      >
-                        💝
-                      </motion.div>
-                    ))}
-                  </>
-                )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative max-w-5xl w-full"
+      >
+        {/* Open-Style Father's Day Card */}
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-4" style={{ borderColor: generatedCard.cardTheme.primaryColor }}>
+          <div className="flex min-h-[500px]">
+            {/* Left side - Image/Avatar */}
+            <div 
+              className="w-1/2 p-8 flex items-center justify-center relative"
+              style={{ 
+                background: `linear-gradient(135deg, ${generatedCard.cardTheme.primaryColor}, ${generatedCard.cardTheme.secondaryColor})` 
+              }}
+            >
+              <div className="text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="mb-6"
+                >
+                  <div 
+                    className="w-48 h-48 mx-auto rounded-full bg-white p-4 shadow-lg"
+                    dangerouslySetInnerHTML={{ __html: generatedCard.dadAvatar }}
+                  />
+                </motion.div>
+                <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">
+                  {generatedCard.frontMessage}
+                </h1>
+                <div className="text-6xl text-white/80">
+                  💙
+                </div>
               </div>
-
-              <motion.h1
-                className="text-4xl font-bold text-white mb-4 drop-shadow-lg z-10"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                Happy
-              </motion.h1>
-              
-              <motion.div
-                className="text-6xl mb-4 z-10"
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                👨‍👧‍👦
-              </motion.div>
-              
-              <motion.h1
-                className="text-4xl font-bold text-white drop-shadow-lg z-10"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-              >
-                Father's Day!
-              </motion.h1>
-
-              {!isCardOpen && (
-                <motion.p
-                  className="text-lg text-white/80 mt-4 z-10"
-                  animate={{ opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  Click to open
-                </motion.p>
-              )}
             </div>
-          </motion.div>
+            
+            {/* Right side - Message */}
+            <div className="w-1/2 p-8 flex flex-col justify-between bg-white">
+              <div className="flex-1 flex items-center">
+                <div className="text-gray-800 text-lg leading-relaxed font-medium break-words">
+                  {generatedCard.insideMessage}
+                </div>
+              </div>
+              
+              {/* Signature */}
+              <div className="border-t-2 pt-6 mt-6" style={{ borderColor: generatedCard.cardTheme.accentColor }}>
+                <div className="text-right">
+                  <p className="text-2xl font-bold mb-2" style={{ color: generatedCard.cardTheme.primaryColor }}>
+                    Love,
+                  </p>
+                  <p className="text-3xl font-bold" style={{ color: generatedCard.cardTheme.accentColor }}>
+                    Kevin
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          {/* Card Inside */}
-          <motion.div
-            className="absolute inset-0 rounded-3xl shadow-2xl overflow-hidden bg-white"
-            style={{ 
-              transform: "rotateY(180deg)",
-              backfaceVisibility: "hidden"
-            }}
+        {/* Action Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          className="text-center mt-8"
+        >
+          <Button
+            onClick={onCardComplete}
+            className="bg-gradient-to-r from-golden-yellow to-arcade-orange hover:from-golden-yellow/90 hover:to-arcade-orange/90 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
           >
-            <div className="h-full p-6 flex flex-col items-center justify-center text-center">
-              {/* Generated Dad Avatar */}
-              <motion.div
-                className="mb-4"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.2, duration: 0.8, type: "spring" }}
-                dangerouslySetInnerHTML={{ __html: generatedCard.dadAvatar }}
-              />
-
-              <motion.p
-                className="text-lg text-gray-800 leading-relaxed mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5 }}
-              >
-                {generatedCard.insideMessage}
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 2 }}
-              >
-                <Button
-                  onClick={onCardComplete}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg"
-                >
-                  Continue to Gift! 🎁
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
+            Continue to Premium Unlock
+          </Button>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -152,24 +152,27 @@ Respond with JSON in this format:
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const prompt = `Create a personalized Father's Day card for ${dadInfo.name} based on these details:
+      const dadName = dadInfo.name === 'Dad' ? 'Dad' : dadInfo.name;
+      
+      const prompt = `Create an authentic, fun and loving Father's Day card for ${dadName}. Write in a natural, heartfelt way that feels genuinely personal - not just substituting provided words.
+
+      Details about ${dadName}:
       - Personality: ${dadInfo.personality}
       - Favorite hobby: ${dadInfo.favoriteHobby}
       - Special trait: ${dadInfo.specialTrait}
       - Favorite memory: ${dadInfo.favoriteMemory}
       
-      Generate a heartfelt, personal message that incorporates these details. Make it warm, specific, and meaningful.
+      Create an open-style greeting card layout with:
+      - frontMessage: Simple "Happy Father's Day!" or similar greeting
+      - insideMessage: Heartfelt 3-4 sentence message written authentically, not just repeating the input details
+      - signature: "Love, Kevin" (will be customizable)
+      - cardTheme: Vibrant colors - primaryColor (main), secondaryColor (accent), accentColor (highlights)
+      - dadAvatar: Simple cartoon dad figure SVG (not emoji)
       
-      Return JSON with:
-      - frontMessage: Short front cover message
-      - insideMessage: Longer personal message inside
-      - dadAvatar: SVG string for a cartoon avatar matching his personality and hobbies
-      - cardTheme: object with primaryColor, secondaryColor, accentColor, pattern
-      
-      Make the avatar cartoon-style and fun, incorporating visual elements that match his personality and hobbies.`;
+      Write the message authentically - transform the details into a natural, loving tribute that sounds like it came from the heart.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "gpt-3.5-turbo", // Using gpt-3.5-turbo due to access limitations
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
       });
