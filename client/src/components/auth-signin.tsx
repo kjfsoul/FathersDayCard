@@ -5,46 +5,26 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { Loader2, Mail, Lock, LogIn } from 'lucide-react';
+import { User } from '@supabase/supabase-js';
 
-interface AuthSignupProps {
-  onSignupSuccess: (user: any) => void;
-  onSwitchToSignin: () => void;
+interface AuthSigninProps {
+  onSigninSuccess: (user: User) => void;
+  onSwitchToSignup: () => void;
 }
 
-export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProps) {
+export function AuthSignin({ onSigninSuccess, onSwitchToSignup }: AuthSigninProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast({
-        title: "Password mismatch",
-        description: "Passwords do not match. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -53,16 +33,16 @@ export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProp
         // Handle specific Supabase auth errors
         let errorMessage = error.message;
         
-        if (error.message.includes('User already registered')) {
-          errorMessage = 'This email is already registered. Please sign in instead.';
-        } else if (error.message.includes('Password should be at least')) {
-          errorMessage = 'Password must be at least 6 characters long.';
-        } else if (error.message.includes('Invalid email')) {
-          errorMessage = 'Please enter a valid email address.';
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and confirm your account first.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Too many login attempts. Please wait a moment and try again.';
         }
 
         toast({
-          title: "Signup failed",
+          title: "Sign in failed",
           description: errorMessage,
           variant: "destructive",
         });
@@ -70,23 +50,14 @@ export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProp
       }
 
       if (data.user) {
-        if (data.user.email_confirmed_at) {
-          // User is immediately confirmed
-          toast({
-            title: "Account created successfully!",
-            description: "Welcome to Father's Day Arcade!",
-          });
-          onSignupSuccess(data.user);
-        } else {
-          // User needs to confirm email
-          toast({
-            title: "Account created!",
-            description: "Please check your email and click the confirmation link to complete signup.",
-          });
-        }
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in to Father's Day Arcade",
+        });
+        onSigninSuccess(data.user);
       }
     } catch (error: any) {
-      console.error('Signup error:', error);
+      console.error('Signin error:', error);
       toast({
         title: "Connection error",
         description: "Unable to connect to authentication service. Please check your internet connection.",
@@ -102,13 +73,13 @@ export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProp
       <Card className="w-full max-w-md bg-white/10 backdrop-blur-lg border-white/20">
         <CardHeader className="text-center">
           <div className="text-6xl mb-4">🎮</div>
-          <CardTitle className="text-2xl font-bold text-white">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-white">Welcome Back</CardTitle>
           <CardDescription className="text-white/80">
-            Join Father's Day Arcade and create personalized experiences
+            Sign in to continue your Father's Day experience
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignin} className="space-y-4">
             <div>
               <Label htmlFor="email" className="text-white">Email</Label>
               <div className="relative">
@@ -132,28 +103,10 @@ export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProp
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Create a password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-white/50" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={6}
                   className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
@@ -167,12 +120,12 @@ export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProp
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
+                  Signing In...
                 </>
               ) : (
                 <>
-                  <User className="mr-2 h-4 w-4" />
-                  Create Account
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Sign In
                 </>
               )}
             </Button>
@@ -180,14 +133,38 @@ export function AuthSignup({ onSignupSuccess, onSwitchToSignin }: AuthSignupProp
 
           <div className="mt-6 text-center">
             <p className="text-white/80 text-sm">
-              Already have an account?{' '}
+              Don't have an account?{' '}
               <button
-                onClick={onSwitchToSignin}
+                onClick={onSwitchToSignup}
                 className="text-pink-300 hover:text-pink-200 underline"
               >
-                Sign in here
+                Create one here
               </button>
             </p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <button
+              onClick={async () => {
+                const { error } = await supabase.auth.resetPasswordForEmail(email);
+                if (error) {
+                  toast({
+                    title: "Error",
+                    description: "Please enter your email first",
+                    variant: "destructive",
+                  });
+                } else {
+                  toast({
+                    title: "Password reset sent",
+                    description: "Check your email for password reset instructions",
+                  });
+                }
+              }}
+              className="text-white/60 hover:text-white/80 text-sm underline"
+              disabled={!email}
+            >
+              Forgot password?
+            </button>
           </div>
         </CardContent>
       </Card>
