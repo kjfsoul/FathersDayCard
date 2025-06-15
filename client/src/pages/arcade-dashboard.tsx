@@ -5,6 +5,8 @@ import { GameModal } from '@/components/game-modal';
 import { StatsSection } from '@/components/stats-section';
 import { PrivacyNotice } from '@/components/privacy-notice';
 import { ShareCard } from '@/components/share-card';
+import { Button } from '@/components/ui/button';
+import { Heart, Mail } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
 export default function ArcadeDashboard({ user }: { user?: User }) {

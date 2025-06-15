@@ -88,9 +88,9 @@ function AuthenticatedApp({ user }: { user: User }) {
           </SubscriptionGate>
         );
       
-      case 'card':
+      case 'animated-card':
         return dadInfo ? (
-          <PersonalizedCard dadInfo={dadInfo} onOpenGift={handleCardComplete} />
+          <AnimatedFatherCard dadInfo={dadInfo} onCardComplete={handleAnimatedCardComplete} />
         ) : (
           <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-foreground">Loading...</div>
@@ -100,12 +100,18 @@ function AuthenticatedApp({ user }: { user: User }) {
       case 'gift-reveal':
         return <GiftReveal onComplete={handleGiftRevealComplete} />;
       
+      case 'arcade-personalizer':
+        return <ArcadeIntroPersonalizer onComplete={handleArcadePersonalizerComplete} />;
+      
       case 'arcade':
         return (
           <SubscriptionGate user={user} feature="unlimited_games">
             <Router user={user} />
           </SubscriptionGate>
         );
+      
+      case 'thank-you-card':
+        return <ThankYouCardCreator onComplete={handleThankYouCardComplete} />;
       
       default:
         return <Router user={user} />;
