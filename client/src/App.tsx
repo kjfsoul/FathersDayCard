@@ -10,12 +10,15 @@ import { ThemeSelector } from "@/components/theme-selector";
 import { EnvelopeAnimation } from "@/components/envelope-animation";
 import { DadQuestionnaire, DadInfo } from "@/components/dad-questionnaire";
 import { PersonalizedCard } from "@/components/personalized-card";
+import { AnimatedFatherCard } from "@/components/animated-father-card";
 import { GiftReveal } from "@/components/gift-reveal";
+import { ArcadeIntroPersonalizer, ArcadeIntroData } from "@/components/arcade-intro-personalizer";
+import { ThankYouCardCreator } from "@/components/thank-you-card-creator";
 import ArcadeDashboard from "@/pages/arcade-dashboard";
 import NotFound from "@/pages/not-found";
 import { User } from "@supabase/supabase-js";
 
-type AppStage = 'theme-selection' | 'envelope' | 'questionnaire' | 'card' | 'gift-reveal' | 'arcade';
+type AppStage = 'theme-selection' | 'envelope' | 'questionnaire' | 'animated-card' | 'gift-reveal' | 'arcade-personalizer' | 'arcade' | 'thank-you-card';
 
 function Router({ user }: { user: User }) {
   return (
@@ -30,6 +33,7 @@ function AuthenticatedApp({ user }: { user: User }) {
   const [currentStage, setCurrentStage] = useState<AppStage>('theme-selection');
   const [selectedTheme, setSelectedTheme] = useState<string>('');
   const [dadInfo, setDadInfo] = useState<DadInfo | null>(null);
+  const [arcadeIntro, setArcadeIntro] = useState<ArcadeIntroData | null>(null);
 
   // Apply theme to document
   useEffect(() => {
@@ -49,14 +53,23 @@ function AuthenticatedApp({ user }: { user: User }) {
 
   const handleQuestionnaireComplete = (info: DadInfo) => {
     setDadInfo(info);
-    setCurrentStage('card');
+    setCurrentStage('animated-card');
   };
 
-  const handleCardComplete = () => {
+  const handleAnimatedCardComplete = () => {
     setCurrentStage('gift-reveal');
   };
 
   const handleGiftRevealComplete = () => {
+    setCurrentStage('arcade-personalizer');
+  };
+
+  const handleArcadePersonalizerComplete = (introData: ArcadeIntroData) => {
+    setArcadeIntro(introData);
+    setCurrentStage('arcade');
+  };
+
+  const handleThankYouCardComplete = () => {
     setCurrentStage('arcade');
   };
 
