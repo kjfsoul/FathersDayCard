@@ -133,7 +133,7 @@ export function DadQuestionnaire({ onComplete }: DadQuestionnaireProps) {
                 placeholder={currentQ.placeholder}
                 value={dadInfo[currentQ.key] as string}
                 onChange={(e) => updateDadInfo(currentQ.key, e.target.value)}
-                className="text-base"
+                className="text-base bg-input text-foreground border-border focus:ring-primary focus:border-primary"
                 autoFocus
               />
             </div>
@@ -145,7 +145,7 @@ export function DadQuestionnaire({ onComplete }: DadQuestionnaireProps) {
                 placeholder={currentQ.placeholder}
                 value={dadInfo[currentQ.key] as string}
                 onChange={(e) => updateDadInfo(currentQ.key, e.target.value)}
-                className="text-base min-h-[100px] resize-none"
+                className="text-base min-h-[100px] resize-none bg-input text-foreground border-border focus:ring-primary focus:border-primary"
                 autoFocus
               />
             </div>

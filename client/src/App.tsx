@@ -4,6 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthWrapper } from "@/components/auth-wrapper";
+import { SubscriptionGate } from "@/components/subscription-gate";
 import { ThemeSelector } from "@/components/theme-selector";
 import { EnvelopeAnimation } from "@/components/envelope-animation";
 import { DadQuestionnaire, DadInfo } from "@/components/dad-questionnaire";
@@ -11,6 +13,7 @@ import { PersonalizedCard } from "@/components/personalized-card";
 import { GiftReveal } from "@/components/gift-reveal";
 import ArcadeDashboard from "@/pages/arcade-dashboard";
 import NotFound from "@/pages/not-found";
+import { User } from "@supabase/supabase-js";
 
 type AppStage = 'theme-selection' | 'envelope' | 'questionnaire' | 'card' | 'gift-reveal' | 'arcade';
 
@@ -23,7 +26,7 @@ function Router() {
   );
 }
 
-function App() {
+function AuthenticatedApp({ user }: { user: User }) {
   const [currentStage, setCurrentStage] = useState<AppStage>('theme-selection');
   const [selectedTheme, setSelectedTheme] = useState<string>('');
   const [dadInfo, setDadInfo] = useState<DadInfo | null>(null);
@@ -66,7 +69,11 @@ function App() {
         return <EnvelopeAnimation onComplete={handleEnvelopeComplete} />;
       
       case 'questionnaire':
-        return <DadQuestionnaire onComplete={handleQuestionnaireComplete} />;
+        return (
+          <SubscriptionGate user={user} feature="card_generation">
+            <DadQuestionnaire onComplete={handleQuestionnaireComplete} />
+          </SubscriptionGate>
+        );
       
       case 'card':
         return dadInfo ? (
@@ -81,18 +88,28 @@ function App() {
         return <GiftReveal onComplete={handleGiftRevealComplete} />;
       
       case 'arcade':
-        return <Router />;
+        return (
+          <SubscriptionGate user={user} feature="unlimited_games">
+            <Router />
+          </SubscriptionGate>
+        );
       
       default:
         return <Router />;
     }
   };
 
+  return renderCurrentStage();
+}
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        {renderCurrentStage()}
+        <AuthWrapper>
+          {(user) => <AuthenticatedApp user={user} />}
+        </AuthWrapper>
       </TooltipProvider>
     </QueryClientProvider>
   );

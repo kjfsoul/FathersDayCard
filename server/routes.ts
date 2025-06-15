@@ -65,6 +65,113 @@ Respond with JSON in this format:
     }
   });
 
+  // Stripe checkout session for subscription
+  app.post('/api/create-checkout-session', async (req, res) => {
+    try {
+      const { userId, priceId } = req.body;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ error: 'Stripe not configured' });
+      }
+
+      const Stripe = (await import('stripe')).default;
+      const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+      const session = await stripeClient.checkout.sessions.create({
+        mode: 'subscription',
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: priceId || 'price_1OQK3SBvSKoCC3DdYeXUuGpU', // Default price ID
+            quantity: 1,
+          },
+        ],
+        success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.origin}/`,
+        metadata: {
+          userId,
+        },
+        allow_promotion_codes: true,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      res.status(500).json({ error: 'Failed to create checkout session' });
+    }
+  });
+
+  // Stripe webhook for subscription events
+  app.post('/api/stripe-webhook', async (req, res) => {
+    try {
+      const stripe = (await import('stripe')).default;
+      const stripeClient = new stripe(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2024-06-20',
+      });
+
+      const sig = req.headers['stripe-signature'] as string;
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+      if (!endpointSecret) {
+        return res.status(400).send('Webhook secret not configured');
+      }
+
+      const event = stripeClient.webhooks.constructEvent(req.body, sig, endpointSecret);
+
+      // Handle subscription events
+      switch (event.type) {
+        case 'checkout.session.completed':
+          const session = event.data.object as any;
+          const userId = session.metadata.userId;
+          // Update user subscription status in Supabase
+          break;
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
+          // Handle subscription changes
+          break;
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(400).send('Webhook error');
+    }
+  });
+
+  // Get trivia question
+  app.get('/api/trivia/:category?', async (req, res) => {
+    try {
+      const category = req.params.category || 'general';
+      // This would connect to Supabase to get trivia questions
+      // For now, return a sample question
+      const sampleQuestion = {
+        id: '1',
+        category,
+        question: 'What is traditionally considered the best gift for Father\'s Day?',
+        correct_answer: 'Time spent together',
+        incorrect_answers: ['Expensive watch', 'New car', 'Golf clubs'],
+        difficulty: 'easy'
+      };
+      
+      res.json(sampleQuestion);
+    } catch (error) {
+      console.error('Error fetching trivia:', error);
+      res.status(500).json({ error: 'Failed to fetch trivia' });
+    }
+  });
+
+  // Save game session
+  app.post('/api/game-session', async (req, res) => {
+    try {
+      const { gameType, score, duration, completed } = req.body;
+      // This would save to Supabase
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error saving game session:', error);
+      res.status(500).json({ error: 'Failed to save game session' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
