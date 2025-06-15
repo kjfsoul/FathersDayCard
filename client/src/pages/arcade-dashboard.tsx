@@ -6,8 +6,9 @@ import { StatsSection } from '@/components/stats-section';
 import { PrivacyNotice } from '@/components/privacy-notice';
 import { ShareCard } from '@/components/share-card';
 import { Button } from '@/components/ui/button';
-import { Heart, Mail } from 'lucide-react';
+import { Heart, Mail, Send } from 'lucide-react'; // Added Send for icon consistency
 import { User } from '@supabase/supabase-js';
+import { Link } from 'react-router-dom';
 
 interface ArcadeDashboardProps {
   user?: User;
@@ -166,6 +167,36 @@ export default function ArcadeDashboard({ user, onThankYouCard }: ArcadeDashboar
               onGameSelect={handleGameSelect}
             />
           ))}
+          {/* Your Card Tile - Added as 5th item */}
+          <motion.div
+            className="bg-card/5 border-2 border-golden-yellow/30 hover:border-golden-yellow rounded-xl shadow-xl p-6 flex flex-col justify-between transition-all duration-300 ease-in-out hover:shadow-golden-yellow/20"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.2 }} // Animation delay after other cards
+            whileHover={{ scale: 1.03 }}
+          >
+            <div className="flex-grow">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-arcade text-xl text-golden-yellow uppercase tracking-wider">
+                  YOUR PERSONALIZED CARD
+                </h3>
+                <i className={`fas fa-envelope-open-text text-3xl text-golden-yellow`}></i>
+              </div>
+              <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+                Revisit the special card created just for Dad. A heartfelt message and unique design, just for him.
+              </p>
+            </div>
+            <div className="mt-auto">
+              <Link to="/card-display">
+                <Button
+                  variant="outline"
+                  className="w-full font-arcade text-golden-yellow border-golden-yellow hover:bg-golden-yellow hover:text-dark-slate transition-colors duration-200"
+                >
+                  View Card <Send size={18} className="ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
 
         <StatsSection

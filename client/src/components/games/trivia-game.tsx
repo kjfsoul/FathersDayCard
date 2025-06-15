@@ -24,6 +24,8 @@ export function TriviaGame({ onGameEnd }: TriviaGameProps) {
   const [score, setScore] = useState(0);
   const [questionCount, setQuestionCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [seenQuestionIds, setSeenQuestionIds] = useState<string[]>([]);
+  const [retryCount, setRetryCount] = useState(0); // For fetching new question
 
   useEffect(() => {
     loadNextQuestion();
@@ -34,12 +36,25 @@ export function TriviaGame({ onGameEnd }: TriviaGameProps) {
     setSelectedAnswer('');
     setShowResult(false);
 
+    if (questionCount === 0 && seenQuestionIds.length > 0) { // Reset seen questions if game restarts (questionCount is 0)
+      setSeenQuestionIds([]);
+    }
+
     try {
       const category = ['dad', 'general', 'sports'][Math.floor(Math.random() * 3)];
       const response = await fetch(`/api/trivia/${category}`);
-      const data = await response.json();
+      const data: TriviaQuestion = await response.json();
+
+      if (seenQuestionIds.includes(data.id) && retryCount < 5) {
+        console.log(`Question ${data.id} already seen. Retrying... (${retryCount + 1})`);
+        setRetryCount(retryCount + 1);
+        loadNextQuestion(); // Recursive call to try fetching a new question
+        return;
+      }
       
+      setRetryCount(0); // Reset retry count for the next question
       setQuestion(data);
+      setSeenQuestionIds(prev => [...prev, data.id]);
       
       // Shuffle answers
       const allAnswers = [...data.incorrect_answers, data.correct_answer];
@@ -47,13 +62,13 @@ export function TriviaGame({ onGameEnd }: TriviaGameProps) {
     } catch (error) {
       console.error('Error loading question:', error);
       // Fallback to built-in questions
-      loadFallbackQuestion();
+      loadFallbackQuestion(); // Fallback might also need seenQuestionIds logic if complex
     } finally {
       setLoading(false);
     }
   };
 
-  const loadFallbackQuestion = () => {
+  const loadFallbackQuestion = () => { // Basic fallback, doesn't interact with seenQuestionIds for simplicity here
     const fallbackQuestions = [
       {
         id: '1',
@@ -121,6 +136,9 @@ export function TriviaGame({ onGameEnd }: TriviaGameProps) {
 
   const endGame = () => {
     onGameEnd(score);
+    // Optionally reset seenQuestionIds here if game can be re-played without full remount
+    // setSeenQuestionIds([]);
+    // For now, relying on questionCount === 0 check in loadNextQuestion for reset.
   };
 
   if (loading) {

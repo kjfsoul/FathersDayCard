@@ -13,7 +13,7 @@ export function EmojiMatchGame({ onGameEnd }: EmojiMatchGameProps) {
   const [grid, setGrid] = useState<string[][]>([]);
   const [targetEmoji, setTargetEmoji] = useState<string>('');
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [gameActive, setGameActive] = useState(true);
 
   useEffect(() => {
