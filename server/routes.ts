@@ -65,10 +65,10 @@ Respond with JSON in this format:
     }
   });
 
-  // Stripe checkout session for subscription
+  // One-time purchase checkout
   app.post('/api/create-checkout-session', async (req, res) => {
     try {
-      const { userId, priceId } = req.body;
+      const { userId } = req.body;
       
       if (!process.env.STRIPE_SECRET_KEY) {
         return res.status(500).json({ error: 'Stripe not configured' });
@@ -78,11 +78,18 @@ Respond with JSON in this format:
       const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
       const session = await stripeClient.checkout.sessions.create({
-        mode: 'subscription',
+        mode: 'payment',
         payment_method_types: ['card'],
         line_items: [
           {
-            price: priceId || 'price_1OQK3SBvSKoCC3DdYeXUuGpU', // Default price ID
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: 'Father\'s Day Arcade - Premium Access',
+                description: 'Unlimited personalized cards and games',
+              },
+              unit_amount: 999, // $9.99
+            },
             quantity: 1,
           },
         ],
@@ -91,50 +98,12 @@ Respond with JSON in this format:
         metadata: {
           userId,
         },
-        allow_promotion_codes: true,
       });
 
       res.json({ url: session.url });
     } catch (error) {
       console.error('Error creating checkout session:', error);
       res.status(500).json({ error: 'Failed to create checkout session' });
-    }
-  });
-
-  // Stripe webhook for subscription events
-  app.post('/api/stripe-webhook', async (req, res) => {
-    try {
-      const stripe = (await import('stripe')).default;
-      const stripeClient = new stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2024-06-20',
-      });
-
-      const sig = req.headers['stripe-signature'] as string;
-      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-      if (!endpointSecret) {
-        return res.status(400).send('Webhook secret not configured');
-      }
-
-      const event = stripeClient.webhooks.constructEvent(req.body, sig, endpointSecret);
-
-      // Handle subscription events
-      switch (event.type) {
-        case 'checkout.session.completed':
-          const session = event.data.object as any;
-          const userId = session.metadata.userId;
-          // Update user subscription status in Supabase
-          break;
-        case 'customer.subscription.updated':
-        case 'customer.subscription.deleted':
-          // Handle subscription changes
-          break;
-      }
-
-      res.json({ received: true });
-    } catch (error) {
-      console.error('Webhook error:', error);
-      res.status(400).send('Webhook error');
     }
   });
 

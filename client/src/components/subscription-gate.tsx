@@ -20,8 +20,8 @@ interface UserData {
 
 const LIMITS = {
   free: {
-    cards_per_month: 3,
-    games_per_day: 20
+    cards_per_session: 1,
+    games_unlimited: true
   }
 };
 
@@ -111,16 +111,16 @@ export function SubscriptionGate({ user, feature, children }: SubscriptionGatePr
     
     if (userData.subscription_status === 'active') return true;
     
-    // Check free tier limits
+    // Allow free access with minimal limits
     if (feature === 'card_generation') {
-      return userData.cards_generated < LIMITS.free.cards_per_month;
+      return userData.cards_generated < LIMITS.free.cards_per_session;
     }
     
     if (feature === 'unlimited_games') {
-      return userData.games_played < LIMITS.free.games_per_day;
+      return LIMITS.free.games_unlimited;
     }
     
-    return false;
+    return true; // Default to allowing access
   };
 
   if (hasAccess()) {
@@ -142,10 +142,10 @@ export function SubscriptionGate({ user, feature, children }: SubscriptionGatePr
             </CardTitle>
             <CardDescription>
               {feature === 'card_generation' && 
-                `You've created ${userData?.cards_generated}/${LIMITS.free.cards_per_month} free cards this month.`
+                `You've created ${userData?.cards_generated}/${LIMITS.free.cards_per_session} free cards this session.`
               }
               {feature === 'unlimited_games' && 
-                `You've played ${userData?.games_played}/${LIMITS.free.games_per_day} free games today.`
+                `Upgrade for unlimited premium games and features.`
               }
             </CardDescription>
           </CardHeader>
@@ -181,9 +181,9 @@ export function SubscriptionGate({ user, feature, children }: SubscriptionGatePr
               {/* Pricing */}
               <div className="bg-muted p-4 rounded-lg">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">$4.99</div>
-                  <div className="text-sm text-muted-foreground">per month</div>
-                  <div className="text-xs text-muted-foreground mt-1">Cancel anytime</div>
+                  <div className="text-2xl font-bold text-foreground">$9.99</div>
+                  <div className="text-sm text-muted-foreground">one-time purchase</div>
+                  <div className="text-xs text-muted-foreground mt-1">Lifetime access</div>
                 </div>
               </div>
 
