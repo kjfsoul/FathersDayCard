@@ -20,8 +20,9 @@ interface UserData {
 
 const LIMITS = {
   free: {
-    cards_per_session: 1,
-    games_unlimited: true
+    cards_per_session: 3, // Allow card preview before payment
+    games_unlimited: true,
+    preview_mode: true
   }
 };
 
