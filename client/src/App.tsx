@@ -91,6 +91,19 @@ function AuthenticatedApp({ user }: { user: User }) {
     setCurrentStage('thank-you-card');
   };
 
+  // Show paywall if activated after card preview
+  if (showPaywall) {
+    return (
+      <PremiumPaywall
+        user={user}
+        onUpgrade={handlePremiumUpgrade}
+        onSkip={handlePaywallSkip}
+        showRandomGame={true}
+        dadName={dadInfo?.name || "Dad"}
+      />
+    );
+  }
+
   const renderCurrentStage = () => {
     switch (currentStage) {
       case 'theme-selection':
@@ -100,11 +113,7 @@ function AuthenticatedApp({ user }: { user: User }) {
         return <EnvelopeAnimation onComplete={handleEnvelopeComplete} />;
       
       case 'questionnaire':
-        return (
-          <SubscriptionGate user={user} feature="card_generation">
-            <DadQuestionnaire onComplete={handleQuestionnaireComplete} />
-          </SubscriptionGate>
-        );
+        return <DadQuestionnaire onComplete={handleQuestionnaireComplete} />;
       
       case 'animated-card':
         return dadInfo ? (
@@ -122,11 +131,7 @@ function AuthenticatedApp({ user }: { user: User }) {
         return <ArcadeIntroPersonalizer onComplete={handleArcadePersonalizerComplete} />;
       
       case 'arcade':
-        return (
-          <SubscriptionGate user={user} feature="unlimited_games">
-            <Router user={user} onThankYouCard={handleThankYouCardStart} />
-          </SubscriptionGate>
-        );
+        return <Router user={user} onThankYouCard={handleThankYouCardStart} />;
       
       case 'thank-you-card':
         return <ThankYouCardCreator onComplete={handleThankYouCardComplete} />;
