@@ -53,9 +53,9 @@ export function PremiumPaywall({ user, onUpgrade, onSkip, showRandomGame = false
     <motion.div 
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4"
+      className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center p-4"
     >
-      <Card className="w-full max-w-lg bg-white/95 backdrop-blur-sm shadow-2xl border-2 border-golden-yellow/20">
+      <Card className="w-full max-w-lg bg-white shadow-2xl border-2 border-blue-300">
         <CardHeader className="text-center space-y-4">
           <motion.div
             initial={{ scale: 0 }}
@@ -84,22 +84,22 @@ export function PremiumPaywall({ user, onUpgrade, onSkip, showRandomGame = false
               Premium Features ($9.99)
             </h3>
             
-            <div className="grid gap-2">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-50">
-                <Heart className="w-4 h-4 text-red-500" />
-                <span className="text-sm">Unlimited personalized cards</span>
+            <div className="grid gap-3">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <Heart className="w-5 h-5 text-red-500" />
+                <span className="text-sm font-medium text-gray-800">Unlimited personalized cards</span>
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-green-50">
-                <Gamepad2 className="w-4 h-4 text-green-600" />
-                <span className="text-sm">Access to all 4 arcade games</span>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                <Gamepad2 className="w-5 h-5 text-green-600" />
+                <span className="text-sm font-medium text-gray-800">Access to all 4 arcade games</span>
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-purple-50">
-                <Gift className="w-4 h-4 text-purple-600" />
-                <span className="text-sm">Premium themes & animations</span>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
+                <Gift className="w-5 h-5 text-purple-600" />
+                <span className="text-sm font-medium text-gray-800">Premium themes & animations</span>
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-yellow-50">
-                <Star className="w-4 h-4 text-golden-yellow" />
-                <span className="text-sm">Advanced sharing features</span>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                <Star className="w-5 h-5 text-amber-600" />
+                <span className="text-sm font-medium text-gray-800">Advanced sharing features</span>
               </div>
             </div>
           </div>
@@ -139,6 +139,10 @@ export function PremiumPaywall({ user, onUpgrade, onSkip, showRandomGame = false
 
           <p className="text-xs text-gray-500 text-center">
             One-time purchase • Secure checkout • Instant access
+          </p>
+          
+          <p className="text-xs text-blue-600 text-center mt-2">
+            Testing? Access games directly at: <a href="/games" className="underline font-medium">/games</a>
           </p>
         </CardContent>
       </Card>

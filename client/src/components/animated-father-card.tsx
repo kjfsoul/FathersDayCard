@@ -23,6 +23,7 @@ interface GeneratedCard {
 export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCardProps) {
   const [generatedCard, setGeneratedCard] = useState<GeneratedCard | null>(null);
   const [isGenerating, setIsGenerating] = useState(true);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   useEffect(() => {
     generateCard();
@@ -138,19 +139,31 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative max-w-5xl w-full"
+        className="relative max-w-4xl w-full"
       >
-        {/* Open-Style Father's Day Card */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-4" style={{ borderColor: generatedCard.cardTheme.primaryColor }}>
-          <div className="flex min-h-[500px]">
-            {/* Left side - Image/Avatar */}
-            <div 
-              className="w-1/2 p-8 flex items-center justify-center relative"
-              style={{ 
-                background: `linear-gradient(135deg, ${generatedCard.cardTheme.primaryColor}, ${generatedCard.cardTheme.secondaryColor})` 
+        {/* 3D Flip Card Container */}
+        <div className="relative w-full h-[500px]" style={{ perspective: '1000px' }}>
+          <motion.div
+            className="relative w-full h-full cursor-pointer"
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+            animate={{
+              rotateY: isFlipped ? 180 : 0,
+            }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onClick={() => setIsFlipped(!isFlipped)}
+          >
+            {/* Front of Card */}
+            <div
+              className="absolute inset-0 w-full h-full rounded-2xl shadow-2xl overflow-hidden border-4"
+              style={{
+                backfaceVisibility: 'hidden',
+                background: `linear-gradient(135deg, ${generatedCard.cardTheme.primaryColor}, ${generatedCard.cardTheme.secondaryColor})`,
+                borderColor: generatedCard.cardTheme.primaryColor
               }}
             >
-              <div className="text-center">
+              <div className="h-full p-8 flex flex-col items-center justify-center text-center relative">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -162,43 +175,71 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
                     dangerouslySetInnerHTML={{ __html: generatedCard.dadAvatar }}
                   />
                 </motion.div>
-                <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-4">
                   {generatedCard.frontMessage}
                 </h1>
-                <div className="text-6xl text-white/80">
+                <div className="text-6xl text-white/80 mb-4">
                   💙
                 </div>
+                <p className="text-lg text-white/90">
+                  Click to open your card
+                </p>
               </div>
             </div>
-            
-            {/* Right side - Message */}
-            <div className="w-1/2 p-8 flex flex-col justify-between bg-white">
-              <div className="flex-1 flex items-center">
-                <div className="text-gray-800 text-lg leading-relaxed font-medium break-words">
-                  {generatedCard.insideMessage}
+
+            {/* Back of Card (Inside) */}
+            <div
+              className="absolute inset-0 w-full h-full rounded-2xl shadow-2xl overflow-hidden border-4 bg-white"
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+                borderColor: generatedCard.cardTheme.primaryColor
+              }}
+            >
+              <div className="h-full flex">
+                {/* Left side - Decorative */}
+                <div 
+                  className="w-1/3 p-6 flex items-center justify-center"
+                  style={{ 
+                    background: `linear-gradient(180deg, ${generatedCard.cardTheme.secondaryColor}, ${generatedCard.cardTheme.accentColor})` 
+                  }}
+                >
+                  <div className="text-center">
+                    <div className="text-6xl text-white/80 mb-4">🎉</div>
+                    <div className="text-2xl text-white/80">❤️</div>
+                  </div>
                 </div>
-              </div>
-              
-              {/* Signature */}
-              <div className="border-t-2 pt-6 mt-6" style={{ borderColor: generatedCard.cardTheme.accentColor }}>
-                <div className="text-right">
-                  <p className="text-2xl font-bold mb-2" style={{ color: generatedCard.cardTheme.primaryColor }}>
-                    Love,
-                  </p>
-                  <p className="text-3xl font-bold" style={{ color: generatedCard.cardTheme.accentColor }}>
-                    Kevin
-                  </p>
+                
+                {/* Right side - Message */}
+                <div className="w-2/3 p-6 flex flex-col justify-between">
+                  <div className="flex-1 flex items-center">
+                    <div className="text-gray-800 text-base leading-relaxed font-medium">
+                      {generatedCard.insideMessage}
+                    </div>
+                  </div>
+                  
+                  {/* Signature */}
+                  <div className="border-t-2 pt-4 mt-4" style={{ borderColor: generatedCard.cardTheme.accentColor }}>
+                    <div className="text-right">
+                      <p className="text-xl font-bold mb-1" style={{ color: generatedCard.cardTheme.primaryColor }}>
+                        Love,
+                      </p>
+                      <p className="text-2xl font-bold" style={{ color: generatedCard.cardTheme.accentColor }}>
+                        Kevin
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Action Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.5 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
           className="text-center mt-8"
         >
           <Button
@@ -207,6 +248,25 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
           >
             Continue to Premium Unlock
           </Button>
+        </motion.div>
+
+        {/* Current Prompt Info */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 0.5 }}
+          className="mt-6 p-4 bg-white/80 rounded-lg text-xs text-gray-600"
+        >
+          <details>
+            <summary className="cursor-pointer font-medium">Card Generation Details</summary>
+            <div className="mt-2 space-y-1">
+              <p><strong>System:</strong> Free card generation (no OpenAI dependency)</p>
+              <p><strong>Dad Name:</strong> {dadInfo.name === 'Dad' ? 'Dad' : dadInfo.name}</p>
+              <p><strong>Personality:</strong> {dadInfo.personality}</p>
+              <p><strong>Template:</strong> Personalized message based on {dadInfo.personality} personality with {dadInfo.favoriteHobby} hobby integration</p>
+              <p><strong>Avatar:</strong> SVG generated with personality-specific features</p>
+            </div>
+          </details>
         </motion.div>
       </motion.div>
     </div>

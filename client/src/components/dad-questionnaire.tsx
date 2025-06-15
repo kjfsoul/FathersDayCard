@@ -170,7 +170,7 @@ export function DadQuestionnaire({ onComplete }: DadQuestionnaireProps) {
                     className="flex items-center space-x-2 cursor-pointer flex-1"
                   >
                     <span className="text-2xl">{option.emoji}</span>
-                    <span className="text-base">{option.label}</span>
+                    <span className="text-base text-gray-800 dark:text-gray-200 font-medium">{option.label}</span>
                   </Label>
                 </motion.div>
               ))}

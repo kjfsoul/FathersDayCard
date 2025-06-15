@@ -24,6 +24,7 @@ function Router({ user, onThankYouCard }: { user: User; onThankYouCard?: () => v
   return (
     <Switch>
       <Route path="/" component={() => <ArcadeDashboard user={user} onThankYouCard={onThankYouCard} />} />
+      <Route path="/games" component={() => <ArcadeDashboard user={user} onThankYouCard={onThankYouCard} />} />
       <Route component={NotFound} />
     </Switch>
   );
