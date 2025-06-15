@@ -211,20 +211,20 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
                 </div>
                 
                 {/* Right side - Message */}
-                <div className="w-2/3 p-6 flex flex-col justify-between">
+                <div className="w-2/3 p-4 flex flex-col justify-between">
                   <div className="flex-1 flex items-center">
-                    <div className="text-gray-800 text-base leading-relaxed font-medium">
+                    <div className="text-gray-800 text-sm leading-relaxed font-medium break-words hyphens-auto overflow-hidden">
                       {generatedCard.insideMessage}
                     </div>
                   </div>
                   
                   {/* Signature */}
-                  <div className="border-t-2 pt-4 mt-4" style={{ borderColor: generatedCard.cardTheme.accentColor }}>
+                  <div className="border-t-2 pt-3 mt-3" style={{ borderColor: generatedCard.cardTheme.accentColor }}>
                     <div className="text-right">
-                      <p className="text-xl font-bold mb-1" style={{ color: generatedCard.cardTheme.primaryColor }}>
+                      <p className="text-lg font-bold mb-1" style={{ color: generatedCard.cardTheme.primaryColor }}>
                         Love,
                       </p>
-                      <p className="text-2xl font-bold" style={{ color: generatedCard.cardTheme.accentColor }}>
+                      <p className="text-xl font-bold" style={{ color: generatedCard.cardTheme.accentColor }}>
                         Kevin
                       </p>
                     </div>

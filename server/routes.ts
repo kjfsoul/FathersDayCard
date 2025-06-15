@@ -151,33 +151,33 @@ Respond with JSON in this format:
       const cardTemplates = {
         funny: {
           messages: [
-            `${dadName}, you always know how to make us laugh! Your sense of humor and love for ${dadInfo.favoriteHobby} brings so much joy to our family. Thanks for being the dad who can turn any ordinary day into an adventure filled with giggles and great memories.`,
-            `${dadName}, your funny personality and passion for ${dadInfo.favoriteHobby} make every day brighter! Remember ${dadInfo.favoriteMemory}? That's just one of countless moments that show how amazing you are. Your ${dadInfo.specialTrait} always puts a smile on our faces.`,
-            `${dadName}, you're not just funny - you're the best! Whether you're enjoying ${dadInfo.favoriteHobby} or just being your wonderful self, you bring laughter and love to everything you do. Your ${dadInfo.specialTrait} makes you truly special to us.`
+            `Dad, you're the king of dad jokes and the master of making us laugh! Your love for ${dadInfo.favoriteHobby} shows your fun side, and your ${dadInfo.specialTrait} makes every day brighter. Thanks for all the amazing memories, especially ${dadInfo.favoriteMemory}.`,
+            `${dadName}, your humor lights up our family! Whether you're enjoying ${dadInfo.favoriteHobby} or just being yourself, you make everything better. Your ${dadInfo.specialTrait} is one of the many things we love about you.`,
+            `Dear ${dadName}, you have this incredible gift of making us smile no matter what. Your passion for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} remind us how lucky we are to have such an amazing father.`
           ],
           colors: { primaryColor: '#FF6B6B', secondaryColor: '#4ECDC4', accentColor: '#45B7D1' }
         },
         serious: {
           messages: [
-            `${dadName}, your thoughtful nature and dedication to ${dadInfo.favoriteHobby} inspire us every day. Your ${dadInfo.specialTrait} shows the depth of your character, and memories like ${dadInfo.favoriteMemory} remind us how blessed we are to have you as our father.`,
-            `${dadName}, your wisdom and love for ${dadInfo.favoriteHobby} have shaped who we are today. Your serious and caring approach to life, combined with your ${dadInfo.specialTrait}, makes you an incredible role model and father we deeply admire.`,
-            `${dadName}, thank you for being our steady rock. Your passion for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} demonstrate the wonderful man you are. Moments like ${dadInfo.favoriteMemory} show us the depth of your love and commitment.`
+            `${dadName}, your wisdom and strength guide our family every day. Your dedication to ${dadInfo.favoriteHobby} shows your thoughtful nature, and your ${dadInfo.specialTrait} makes us proud to be your children. Thank you for being our rock.`,
+            `Dad, you've taught us the value of hard work and integrity. Your love for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} inspire us to be better people. Memories like ${dadInfo.favoriteMemory} show us your caring heart.`,
+            `Dear ${dadName}, your steady presence and thoughtful guidance mean everything to us. Whether you're pursuing ${dadInfo.favoriteHobby} or just being the amazing father you are, we admire your ${dadInfo.specialTrait}.`
           ],
           colors: { primaryColor: '#2C3E50', secondaryColor: '#3498DB', accentColor: '#E74C3C' }
         },
         adventurous: {
           messages: [
-            `${dadName}, your adventurous spirit and love for ${dadInfo.favoriteHobby} inspire us to explore and dream big! Your ${dadInfo.specialTrait} shows us that life is meant to be lived fully. Thanks for teaching us that every day can be an adventure.`,
-            `${dadName}, whether you're pursuing ${dadInfo.favoriteHobby} or just being your amazing self, you show us what it means to live boldly. Your ${dadInfo.specialTrait} and memories like ${dadInfo.favoriteMemory} remind us how incredible you are.`,
-            `${dadName}, your adventurous heart and passion for ${dadInfo.favoriteHobby} make life so exciting! Your ${dadInfo.specialTrait} proves that the best dads are the ones who aren't afraid to explore, learn, and grow alongside their families.`
+            `${dadName}, you've shown us that life is meant to be lived to the fullest! Your adventurous spirit and love for ${dadInfo.favoriteHobby} inspire us to chase our dreams. Your ${dadInfo.specialTrait} makes every adventure more exciting.`,
+            `Dad, you're proof that growing up doesn't mean giving up on fun! Your passion for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} teach us to embrace life's adventures. Thanks for memories like ${dadInfo.favoriteMemory}.`,
+            `Dear ${dadName}, you've taught us to be brave and curious about the world. Your love for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} show us what it means to live boldly and love deeply.`
           ],
           colors: { primaryColor: '#E67E22', secondaryColor: '#27AE60', accentColor: '#F39C12' }
         },
         gentle: {
           messages: [
-            `${dadName}, your gentle heart and love for ${dadInfo.favoriteHobby} create such a peaceful, loving home. Your ${dadInfo.specialTrait} shows the kindness that makes you not just a wonderful father, but an amazing person we're grateful to know.`,
-            `${dadName}, your gentle nature and passion for ${dadInfo.favoriteHobby} bring such warmth to our family. Memories like ${dadInfo.favoriteMemory} show the tender love you share, and your ${dadInfo.specialTrait} makes every day feel more special.`,
-            `${dadName}, thank you for your gentle guidance and love for ${dadInfo.favoriteHobby}. Your ${dadInfo.specialTrait} and the care you show in everything you do proves that the strongest fathers are also the most gentle and loving.`
+            `${dadName}, your gentle heart and kind soul make our home a place of love and warmth. Your passion for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} show us the beauty of a caring father. We treasure you.`,
+            `Dad, your gentle strength and loving nature have shaped who we are today. Whether you're enjoying ${dadInfo.favoriteHobby} or just being present for us, your ${dadInfo.specialTrait} makes us feel so loved.`,
+            `Dear ${dadName}, you've shown us that true strength comes from kindness. Your love for ${dadInfo.favoriteHobby} and your ${dadInfo.specialTrait} remind us daily how blessed we are to have you as our father.`
           ],
           colors: { primaryColor: '#8E44AD', secondaryColor: '#16A085', accentColor: '#E91E63' }
         }
@@ -213,51 +213,64 @@ Respond with JSON in this format:
     const features = personalityFeatures[dadInfo.personality] || personalityFeatures.gentle;
     
     return `
-      <svg width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <svg width="180" height="180" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto;">
         <defs>
           <radialGradient id="faceGradient" cx="50%" cy="40%" r="60%">
             <stop offset="0%" style="stop-color:#FFE4B5"/>
             <stop offset="100%" style="stop-color:#DEB887"/>
           </radialGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <dropShadow dx="2" dy="2" stdDeviation="3" flood-color="#00000040"/>
+          </filter>
         </defs>
         
+        <!-- Background circle -->
+        <circle cx="100" cy="100" r="85" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+        
         <!-- Face -->
-        <circle cx="100" cy="100" r="75" fill="url(#faceGradient)" stroke="#8B4513" stroke-width="2"/>
+        <circle cx="100" cy="100" r="70" fill="url(#faceGradient)" stroke="#8B4513" stroke-width="2" filter="url(#shadow)"/>
         
         <!-- Hair -->
-        <path d="M 35 65 Q 100 25 165 65 Q 155 40 100 30 Q 45 40 35 65" fill="#8B4513"/>
+        <path d="M 40 70 Q 100 30 160 70 Q 150 45 100 35 Q 50 45 40 70" fill="#654321"/>
         
         <!-- Eyes -->
-        <circle cx="80" cy="85" r="6" fill="#333"/>
-        <circle cx="120" cy="85" r="6" fill="#333"/>
-        <circle cx="82" cy="83" r="2" fill="#FFF"/>
-        <circle cx="122" cy="83" r="2" fill="#FFF"/>
+        <circle cx="80" cy="88" r="5" fill="#333"/>
+        <circle cx="120" cy="88" r="5" fill="#333"/>
+        <circle cx="82" cy="86" r="2" fill="#FFF"/>
+        <circle cx="122" cy="86" r="2" fill="#FFF"/>
         
         ${features.glasses ? `
-          <circle cx="80" cy="85" r="15" fill="none" stroke="#333" stroke-width="2"/>
-          <circle cx="120" cy="85" r="15" fill="none" stroke="#333" stroke-width="2"/>
-          <line x1="95" y1="85" x2="105" y2="85" stroke="#333" stroke-width="2"/>
+          <circle cx="80" cy="88" r="12" fill="none" stroke="#333" stroke-width="2"/>
+          <circle cx="120" cy="88" r="12" fill="none" stroke="#333" stroke-width="2"/>
+          <line x1="92" y1="88" x2="108" y2="88" stroke="#333" stroke-width="2"/>
         ` : ''}
         
+        <!-- Eyebrows -->
+        <path d="M 70 78 Q 80 75 90 78" stroke="#654321" stroke-width="2" fill="none"/>
+        <path d="M 110 78 Q 120 75 130 78" stroke="#654321" stroke-width="2" fill="none"/>
+        
         <!-- Nose -->
-        <ellipse cx="100" cy="100" rx="3" ry="5" fill="#CD853F"/>
+        <ellipse cx="100" cy="102" rx="3" ry="6" fill="#CD853F"/>
         
         <!-- Mouth based on smile type -->
         ${features.smile === 'big' ? 
-          `<path d="M 80 115 Q 100 135 120 115" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/>` :
+          `<path d="M 80 118 Q 100 138 120 118" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/>` :
           features.smile === 'warm' ?
-          `<path d="M 85 115 Q 100 125 115 115" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>` :
-          `<path d="M 90 115 Q 100 120 110 115" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>`
+          `<path d="M 85 118 Q 100 128 115 118" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>` :
+          `<path d="M 90 118 Q 100 123 110 118" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>`
         }
         
         ${features.beard ? `
-          <path d="M 70 130 Q 100 150 130 130 Q 125 145 100 147 Q 75 145 70 130" fill="#654321"/>
+          <path d="M 75 130 Q 100 150 125 130 Q 120 145 100 147 Q 80 145 75 130" fill="#654321"/>
         ` : ''}
         
         ${features.hat ? `
-          <path d="M 40 65 Q 100 20 160 65 L 150 55 Q 100 15 50 55 Z" fill="#4A4A4A"/>
-          <ellipse cx="100" cy="45" rx="8" ry="4" fill="#FF4444"/>
+          <path d="M 45 70 Q 100 25 155 70 L 145 60 Q 100 20 55 60 Z" fill="#2c3e50"/>
+          <ellipse cx="100" cy="50" rx="6" ry="3" fill="#e74c3c"/>
         ` : ''}
+        
+        <!-- Shirt collar -->
+        <path d="M 70 170 Q 100 175 130 170 L 130 200 L 70 200 Z" fill="#4a90e2"/>
       </svg>
     `;
   }

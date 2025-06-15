@@ -93,9 +93,9 @@ export function DadQuestionnaire({ onComplete }: DadQuestionnaireProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
       <motion.div 
-        className="max-w-md w-full bg-card border border-border rounded-2xl p-8 shadow-2xl"
+        className="max-w-md w-full bg-white/95 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
