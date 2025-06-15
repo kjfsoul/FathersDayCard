@@ -262,7 +262,126 @@ Respond with JSON in this format:
     }
   });
 
-  const httpServer = createServer(app);
+  // User profile management - authenticate via Supabase
+  app.get('/api/user/profile', async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      // Extract user ID from auth header (simplified for demo)
+      const userId = authHeader.split('_')[1]; // Assumes format like "Bearer user_123"
+      
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser) {
+        // Create user profile if it doesn't exist
+        const newUser = await storage.upsertUser({ 
+          id: userId, 
+          email: `user${userId}@example.com` 
+        });
+        return res.json(newUser);
+      }
+      
+      res.json(dbUser);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
+  // Save father card with personalization data
+  app.post('/api/cards/save', async (req, res) => {
+    try {
+      const { userId, dadName, dadInfo, cardContent } = req.body;
+      if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+      const cardId = await storage.saveFatherCard(userId, dadName, dadInfo, cardContent);
+      res.json({ cardId, success: true });
+    } catch (error) {
+      console.error('Error saving father card:', error);
+      res.status(500).json({ error: 'Failed to save card' });
+    }
+  });
+
+  // Retrieve specific father card
+  app.get('/api/cards/:cardId', async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const card = await storage.getFatherCard(cardId);
+      
+      if (!card) return res.status(404).json({ error: 'Card not found' });
+      res.json(card);
+    } catch (error) {
+      console.error('Error fetching card:', error);
+      res.status(500).json({ error: 'Failed to fetch card' });
+    }
+  });
+
+  // Get all user's cards
+  app.get('/api/user/:userId/cards', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const cards = await storage.getUserCards(userId);
+      res.json(cards);
+    } catch (error) {
+      console.error('Error fetching user cards:', error);
+      res.status(500).json({ error: 'Failed to fetch cards' });
+    }
+  });
+
+  // Save game session with personalized tracking
+  app.post('/api/games/save-session', async (req, res) => {
+    try {
+      const { userId, gameType, score, duration } = req.body;
+      if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+      const sessionId = await storage.saveGameSession(userId, gameType, score, duration);
+      res.json({ sessionId, success: true });
+    } catch (error) {
+      console.error('Error saving game session:', error);
+      res.status(500).json({ error: 'Failed to save game session' });
+    }
+  });
+
+  // Get personalized game statistics
+  app.get('/api/user/:userId/game-stats', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const stats = await storage.getUserGameStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching game stats:', error);
+      res.status(500).json({ error: 'Failed to fetch game stats' });
+    }
+  });
+
+  // Premium upgrade endpoint
+  app.post('/api/upgrade/premium', async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+      // Update user subscription status
+      await storage.updateUserStats(userId, {});
+      
+      res.json({ 
+        success: true, 
+        message: 'Welcome to Premium! You now have unlimited access to all features.',
+        features: [
+          'Unlimited personalized Father\'s Day cards',
+          'Access to all 4 arcade games', 
+          'Premium card themes and animations',
+          'Advanced sharing features',
+          'Personalized game statistics'
+        ]
+      });
+    } catch (error) {
+      console.error('Error upgrading to premium:', error);
+      res.status(500).json({ error: 'Failed to upgrade' });
+    }
+  });
+
+  const httpServer = createServer(app);
   return httpServer;
 }

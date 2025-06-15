@@ -5,8 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthWrapper } from "@/components/auth-wrapper";
-import { SubscriptionGate } from "@/components/subscription-gate";
 import { ThemeSelector } from "@/components/theme-selector";
+import { PremiumPaywall } from "@/components/premium-paywall";
 import { EnvelopeAnimation } from "@/components/envelope-animation";
 import { DadQuestionnaire, DadInfo } from "@/components/dad-questionnaire";
 import { PersonalizedCard } from "@/components/personalized-card";
@@ -34,6 +34,8 @@ function AuthenticatedApp({ user }: { user: User }) {
   const [selectedTheme, setSelectedTheme] = useState<string>('');
   const [dadInfo, setDadInfo] = useState<DadInfo | null>(null);
   const [arcadeIntro, setArcadeIntro] = useState<ArcadeIntroData | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   // Apply theme to document
   useEffect(() => {
@@ -57,6 +59,18 @@ function AuthenticatedApp({ user }: { user: User }) {
   };
 
   const handleAnimatedCardComplete = () => {
+    // Show paywall after card preview
+    setShowPaywall(true);
+  };
+
+  const handlePremiumUpgrade = () => {
+    setIsPremium(true);
+    setShowPaywall(false);
+    setCurrentStage('gift-reveal');
+  };
+
+  const handlePaywallSkip = () => {
+    setShowPaywall(false);
     setCurrentStage('gift-reveal');
   };
 
