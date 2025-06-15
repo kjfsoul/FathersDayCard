@@ -53,7 +53,11 @@ Respond with JSON in this format:
         max_tokens: 500
       });
 
-      const cardContent = JSON.parse(response.choices[0].message.content);
+      const messageContent = response.choices[0].message.content;
+      if (!messageContent) {
+        throw new Error('No content received from OpenAI');
+      }
+      const cardContent = JSON.parse(messageContent);
       res.json(cardContent);
     } catch (error) {
       console.error('Error generating card:', error);
