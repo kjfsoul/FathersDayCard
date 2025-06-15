@@ -1,0 +1,113 @@
+# Father’s Day Arcade – Delta Files for Replit
+
+Paste each file into the matching path in your existing Replit project, overwriting whenever noted.  All HTML is mobile‑first and pulls **dadName** from `localStorage` so the name captured on the card carries through to the dashboard.
+
+---
+
+## public/card.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Father’s Day Card</title>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="../src/common.js"></script>
+  <style>
+    body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;background:#fdfdfd;padding:1rem}
+    h2{margin:1rem 0;font-size:1.5rem;cursor:text}
+    button{padding:.75rem 1.5rem;font-size:1rem;border:none;border-radius:8px;background:#ff8c42;color:#fff;cursor:pointer}
+    button:hover{background:#ff7b24}
+  </style>
+</head>
+<body>
+  <!-- Lottie JSON placeholder – export from Canva or LottieFiles and place in /public/MY_CARD.json -->
+  <lottie-player src="./MY_CARD.json" background="transparent" speed="1" style="width:100%;max-width:400px;height:auto" loop autoplay></lottie-player>
+
+  <h2 contenteditable="true">Happy Father’s Day, <span id="dadName">Dad</span>!</h2>
+
+  <button id="openGift">🎮 Open My Gift Arcade</button>
+
+  <script>
+    const span=document.getElementById('dadName');
+    span.textContent=getDadName();
+    document.getElementById('openGift').onclick=()=>location.href='dashboard.html';
+  </script>
+</body>
+</html>
+```
+
+---
+
+## public/dashboard.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dad Arcade Dashboard</title>
+  <script src="../src/common.js"></script>
+  <style>
+    body{margin:0;font-family:sans-serif;padding:1rem;background:#fafafa;color:#333}
+    header{font-size:1.25rem;text-align:center;margin-bottom:1rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem}
+    .tile{background:#fff;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.08);padding:1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#333;transition:transform .15s}
+    .tile:hover{transform:translateY(-4px)}
+    footer{margin-top:2rem;text-align:center;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header>Welcome <span id="dadName">Dad</span> – Your Arcade Awaits!</header>
+  <section class="grid">
+    <a class="tile" href="card.html">💌<br/>View Card</a>
+    <a class="tile" href="games/emoji-match.html">😀<br/>Emoji Match</a>
+    <a class="tile" href="games/emoji-memory.html">🧠<br/>Emoji Memory</a>
+    <a class="tile" href="games/trivia.html">❓<br/>Trivia Challenge</a>
+    <a class="tile" href="games/catch-ball.html">🏀<br/>Catch the Ball</a>
+  </section>
+  <footer>
+    🎁 Build Your Own → <a href="https://birthdaygen.com/waitlist" target="_blank">BirthdayGen Wait‑list</a>
+  </footer>
+
+  <script>
+    document.getElementById('dadName').textContent=getDadName();
+  </script>
+</body>
+</html>
+```
+
+---
+
+## src/common.js
+
+```javascript
+// src/common.js – shared helper
+export function getDadName(){
+  return localStorage.getItem('dadName')||'Dad';
+}
+```
+
+---
+
+## netlify.toml (append)
+
+```toml
+[[redirects]]
+  from   = "/"
+  to     = "/card.html"
+  status = 301
+```
+
+---
+
+### Quick Check‑List
+
+1. Add /public/MY\_CARD.json (animated Lottie).
+2. Ensure earlier mini‑game HTML/JS files remain in `/public/games` + `/src`.
+3. Commit → GitHub → Netlify deploy → root URL now shows the animated card, CTA opens dashboard.
+
+All other previously generated files remain unchanged.
