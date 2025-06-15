@@ -42,18 +42,31 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
 
     try {
       if (authMode === 'signup') {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
         if (error) throw error;
-        setMessage('Check your email for the confirmation link!');
+        
+        if (data.user && !data.user.email_confirmed_at) {
+          setMessage('Account created! Email confirmation is required but may not be configured. Try signing in or contact support.');
+        } else {
+          setMessage('Account created successfully!');
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            setMessage('Email confirmation required. Please check your email or contact support if no email was received.');
+          } else if (error.message.includes('Invalid login credentials')) {
+            setMessage('Invalid email or password. If you just signed up, your email may need confirmation.');
+          } else {
+            throw error;
+          }
+        }
       }
     } catch (error: any) {
       setMessage(error.message);
