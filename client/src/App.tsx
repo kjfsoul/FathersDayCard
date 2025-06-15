@@ -106,6 +106,11 @@ function AuthenticatedApp({ user }: { user: User }) {
   }
 
   const renderCurrentStage = () => {
+    // Direct games access bypass
+    if (window.location.pathname === '/games') {
+      return <ArcadeDashboard user={user} onThankYouCard={handleThankYouCardStart} />;
+    }
+
     switch (currentStage) {
       case 'theme-selection':
         return <ThemeSelector onThemeSelect={handleThemeSelect} />;

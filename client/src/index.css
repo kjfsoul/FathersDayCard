@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global text visibility fix - ensure bright text on dark backgrounds */
+.dark-bg {
+  color: #ffffff !important;
+}
+
+.dark-bg * {
+  color: #ffffff !important;
+}
+
+.dark-bg input {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.dark-bg button {
+  color: #ffffff !important;
+}
+
+.dark-bg .text-gray-600,
+.dark-bg .text-gray-700,
+.dark-bg .text-gray-800,
+.dark-bg .text-gray-900 {
+  color: #ffffff !important;
+}
+
 /* Default Dark Theme */
 :root {
   --background: hsl(240, 10%, 3.9%);
