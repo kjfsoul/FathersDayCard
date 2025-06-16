@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { Howl } from 'howler';
 
 interface MemoryGameProps {
   onGameEnd: (score: number) => void;
@@ -14,6 +15,11 @@ interface Card {
 }
 
 const EMOJIS = ['🎮', '🎯', '🏆', '⭐', '🎨', '🎪'];
+
+const flipSound = new Howl({
+  src: ['https://cdn.freesound.org/previews/253/253177_4107007-lq.ogg'],
+  volume: 0.5,
+});
 
 export function MemoryGame({ onGameEnd }: MemoryGameProps) {
   const [cards, setCards] = useState<Card[]>([]);
@@ -107,6 +113,9 @@ export function MemoryGame({ onGameEnd }: MemoryGameProps) {
       c.id === cardId ? { ...c, isFlipped: true } : c
     ));
     
+    if (!card.isFlipped && !card.isMatched) {
+      flipSound.play();
+    }
     setFlippedCards(prev => [...prev, cardId]);
   };
 

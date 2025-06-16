@@ -236,7 +236,7 @@ export function PersonalizedCard({ dadInfo, onOpenGift }: PersonalizedCardProps)
                   borderColor: cardContent.colors.accent
                 }}
               >
-                🎮 Open Your Arcade Gift!
+                🎁 Open Gift Arcade
               </Button>
             </motion.div>
 
