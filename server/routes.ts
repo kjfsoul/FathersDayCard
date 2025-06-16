@@ -22,14 +22,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 - Favorite memory: ${dadInfo.favoriteMemory}
 - Special trait: ${dadInfo.specialTrait}
 
-Create a heartfelt, personal message that incorporates these details. The tone should match the personality type. Keep it warm, genuine, and about 3-4 sentences. Also suggest an appropriate emoji for the card theme.
+Craft a message that is **primarily witty and humorous**, especially if the personality is 'funny'. Even for other personalities (serious, adventurous, gentle), try to **inject subtle, light-hearted humor** where appropriate, while still being heartfelt and personal. The message should cleverly incorporate the provided details about dad. Aim for 3-5 sentences.
+Also suggest an appropriate emoji that reflects the card's theme and humor.
+
+The message must be suitable for a Father's Day card.
 
 Respond with JSON in this format:
 {
-  "title": "Happy Father's Day, [Name]!",
-  "message": "Personal heartfelt message here...",
-  "animation": "😊",
-  "colors": {
+  "title": "Happy Father's Day, ${dadInfo.name}!",
+  "message": "Witty, humorous, and personalized message here...",
+  "animation": "😂", // Example emoji, the AI should pick a suitable one
+  "colors": { // AI can suggest thematic colors or use these defaults
     "primary": "#FF6B35",
     "secondary": "#F7931E", 
     "accent": "#FFD23F"

@@ -47,16 +47,16 @@ function AuthenticatedApp({ user }: { user: User }) {
 
   const handleThemeSelect = (theme: string) => {
     setSelectedTheme(theme);
-    setCurrentStage('envelope');
+    setCurrentStage('questionnaire');
   };
 
   const handleEnvelopeComplete = () => {
-    setCurrentStage('questionnaire');
+    setCurrentStage('animated-card');
   };
 
   const handleQuestionnaireComplete = (info: DadInfo) => {
     setDadInfo(info);
-    setCurrentStage('animated-card');
+    setCurrentStage('envelope');
   };
 
   const handleAnimatedCardComplete = () => {
@@ -116,7 +116,7 @@ function AuthenticatedApp({ user }: { user: User }) {
         return <ThemeSelector onThemeSelect={handleThemeSelect} />;
       
       case 'envelope':
-        return <EnvelopeAnimation onComplete={handleEnvelopeComplete} />;
+        return <EnvelopeAnimation dadName={dadInfo?.name || 'Dad'} onComplete={handleEnvelopeComplete} />;
       
       case 'questionnaire':
         return <DadQuestionnaire onComplete={handleQuestionnaireComplete} />;
