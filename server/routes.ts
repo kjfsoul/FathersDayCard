@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import OpenAI from "openai";
-import { storage } from "./storage";
+import { supabase } from "../client/src/lib/supabase"; // Corrected path
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Generate personalized Father's Day card
@@ -362,26 +362,61 @@ Respond with JSON in this format:
   app.get('/api/user/profile', async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized: Missing or invalid Authorization header' });
+      }
+      const jwt = authHeader.replace('Bearer ', '');
+
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(jwt);
+
+      if (authError || !authUser) {
+        console.error('Auth error:', authError?.message);
+        return res.status(401).json({ error: 'Unauthorized: Invalid token or authentication error' });
+      }
+
+      // Attempt to fetch user profile from a 'profiles' table
+      // This assumes you have a 'profiles' table linked to auth.users via id
+      let { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116: "Searched for a single row, but found no rows" (i.e., profile doesn't exist)
+        console.error('Error fetching profile:', profileError.message);
+        // Do not expose detailed database errors to the client
+        return res.status(500).json({ error: 'Internal server error while fetching profile' });
+      }
+
+      if (!profile) {
+        // Profile doesn't exist, create it
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authUser.id,
+            email: authUser.email,
+            // Add any other default fields for a new profile, e.g.,
+            // subscription_status: 'free',
+            // cards_generated: 0,
+            // games_played: 0,
+            // total_score: 0,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError.message);
+          return res.status(500).json({ error: 'Internal server error while creating profile' });
+        }
+        profile = newProfile;
       }
       
-      // Extract user ID from auth header (simplified for demo)
-      const userId = authHeader.split('_')[1]; // Assumes format like "Bearer user_123"
-      
-      const dbUser = await storage.getUser(userId);
-      if (!dbUser) {
-        // Create user profile if it doesn't exist
-        const newUser = await storage.upsertUser({ 
-          id: userId, 
-          email: `user${userId}@example.com` 
-        });
-        return res.json(newUser);
-      }
-      
-      res.json(dbUser);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
+      // Combine auth user info with profile info if needed, or just return profile
+      // For now, returning the profile which should contain relevant fields
+      res.json(profile);
+
+    } catch (error: any) {
+      console.error('Error in /api/user/profile:', error.message);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -389,14 +424,58 @@ Respond with JSON in this format:
   // Save father card with personalization data
   app.post('/api/cards/save', async (req, res) => {
     try {
-      const { userId, dadName, dadInfo, cardContent } = req.body;
-      if (!userId) return res.status(400).json({ error: 'User ID required' });
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const jwt = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(jwt);
 
-      const cardId = await storage.saveFatherCard(userId, dadName, dadInfo, cardContent);
+      if (authError || !authUser) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { dadName, dadInfo, cardContent } = req.body;
+      if (!dadName || !dadInfo || !cardContent) {
+        return res.status(400).json({ error: 'Missing required card data' });
+      }
+
+      const cardId = `card_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const { error: insertError } = await supabase.from('father_cards').insert({
+        id: cardId,
+        user_id: authUser.id,
+        dad_name: dadName,
+        dad_info: dadInfo,
+        card_content: cardContent,
+        // created_at will default to now() if table is set up that way
+        // view_count will default to 0 if table is set up that way
+      });
+
+      if (insertError) {
+        console.error('Error saving card:', insertError.message);
+        return res.status(500).json({ error: 'Failed to save card' });
+      }
+
+      // Optionally, update user's cards_generated count in 'profiles' table
+      // This requires 'profiles' table to have 'cards_generated' column
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('cards_generated')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profile && !profileError) {
+        await supabase
+          .from('profiles')
+          .update({ cards_generated: (profile.cards_generated || 0) + 1 })
+          .eq('id', authUser.id);
+      } // else, log profileError or handle missing profile if critical
+
       res.json({ cardId, success: true });
-    } catch (error) {
-      console.error('Error saving father card:', error);
-      res.status(500).json({ error: 'Failed to save card' });
+    } catch (error: any) {
+      console.error('Error in /api/cards/save:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
@@ -404,62 +483,201 @@ Respond with JSON in this format:
   app.get('/api/cards/:cardId', async (req, res) => {
     try {
       const { cardId } = req.params;
-      const card = await storage.getFatherCard(cardId);
+      if (!cardId) {
+        return res.status(400).json({ error: 'Card ID required' });
+      }
+
+      const { data: card, error } = await supabase
+        .from('father_cards')
+        .select('*')
+        .eq('id', cardId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116: no rows found
+        console.error('Error fetching card:', error.message);
+        return res.status(500).json({ error: 'Failed to fetch card' });
+      }
+
+      if (!card) {
+        return res.status(404).json({ error: 'Card not found' });
+      }
+
+      // Increment view_count (non-atomically for simplicity here)
+      // For atomic increment, an RPC function in Supabase DB is better.
+      await supabase
+        .from('father_cards')
+        .update({ view_count: (card.view_count || 0) + 1 })
+        .eq('id', cardId);
       
-      if (!card) return res.status(404).json({ error: 'Card not found' });
+      // Return the card with potentially stale view_count or re-fetch,
+      // for simplicity, return the card fetched initially.
+      // To return updated view_count, add `card.view_count = (card.view_count || 0) + 1;`
       res.json(card);
-    } catch (error) {
-      console.error('Error fetching card:', error);
-      res.status(500).json({ error: 'Failed to fetch card' });
+    } catch (error: any) {
+      console.error('Error in /api/cards/:cardId:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
-  // Get all user's cards
-  app.get('/api/user/:userId/cards', async (req, res) => {
+  // Get all user's cards (for the authenticated user)
+  app.get('/api/user/cards', async (req, res) => {
     try {
-      const { userId } = req.params;
-      const cards = await storage.getUserCards(userId);
-      res.json(cards);
-    } catch (error) {
-      console.error('Error fetching user cards:', error);
-      res.status(500).json({ error: 'Failed to fetch cards' });
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const jwt = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(jwt);
+
+      if (authError || !authUser) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { data: cards, error } = await supabase
+        .from('father_cards')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching user cards:', error.message);
+        return res.status(500).json({ error: 'Failed to fetch user cards' });
+      }
+
+      res.json(cards || []);
+    } catch (error: any) {
+      console.error('Error in /api/user/cards:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
   // Save game session with personalized tracking
   app.post('/api/games/save-session', async (req, res) => {
     try {
-      const { userId, gameType, score, duration } = req.body;
-      if (!userId) return res.status(400).json({ error: 'User ID required' });
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const jwt = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(jwt);
 
-      const sessionId = await storage.saveGameSession(userId, gameType, score, duration);
+      if (authError || !authUser) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { gameType, score, duration } = req.body; // 'completed' field can be added if needed
+      if (!gameType || typeof score !== 'number') {
+        return res.status(400).json({ error: 'Missing required game session data (gameType, score)' });
+      }
+
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const { error: insertError } = await supabase.from('game_sessions').insert({
+        id: sessionId,
+        user_id: authUser.id,
+        game_type: gameType,
+        score: score,
+        duration_seconds: duration,
+        // completed: completed // if you add 'completed' to req.body
+      });
+
+      if (insertError) {
+        console.error('Error saving game session:', insertError.message);
+        return res.status(500).json({ error: 'Failed to save game session' });
+      }
+
+      // Update user's game stats in 'profiles' table
+      // Assumes 'profiles' table has 'games_played' and 'total_score' columns
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('games_played, total_score')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profile && !profileError) {
+        await supabase
+          .from('profiles')
+          .update({
+            games_played: (profile.games_played || 0) + 1,
+            total_score: (profile.total_score || 0) + score
+          })
+          .eq('id', authUser.id);
+      } // else, log profileError or handle if critical
+
       res.json({ sessionId, success: true });
-    } catch (error) {
-      console.error('Error saving game session:', error);
-      res.status(500).json({ error: 'Failed to save game session' });
+    } catch (error: any) {
+      console.error('Error in /api/games/save-session:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
-  // Get personalized game statistics
-  app.get('/api/user/:userId/game-stats', async (req, res) => {
+  // Get personalized game statistics for the authenticated user
+  app.get('/api/user/game-stats', async (req, res) => {
     try {
-      const { userId } = req.params;
-      const stats = await storage.getUserGameStats(userId);
-      res.json(stats);
-    } catch (error) {
-      console.error('Error fetching game stats:', error);
-      res.status(500).json({ error: 'Failed to fetch game stats' });
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const jwt = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(jwt);
+
+      if (authError || !authUser) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('game_sessions')
+        .select('game_type, score')
+        .eq('user_id', authUser.id);
+
+      if (sessionsError) {
+        console.error('Error fetching game sessions for stats:', sessionsError.message);
+        return res.status(500).json({ error: 'Failed to fetch game stats' });
+      }
+
+      const totalScore = sessions.reduce((sum, session) => sum + (session.score || 0), 0);
+      const gamesPlayed = sessions.length;
+
+      const highScores: Record<string, number> = {};
+      sessions.forEach(session => {
+        const gameType = session.game_type;
+        if (gameType && (session.score || 0) > (highScores[gameType] || 0)) {
+          highScores[gameType] = session.score || 0;
+        }
+      });
+
+      res.json({ totalScore, gamesPlayed, highScores });
+    } catch (error: any) {
+      console.error('Error in /api/user/game-stats:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
   // Premium upgrade endpoint
   app.post('/api/upgrade/premium', async (req, res) => {
     try {
-      const { userId } = req.body;
-      if (!userId) return res.status(400).json({ error: 'User ID required' });
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const jwt = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(jwt);
 
-      // Update user subscription status
-      await storage.updateUserStats(userId, {});
+      if (authError || !authUser) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      // Update user's premium status in 'profiles' table
+      // Using a boolean field 'is_premium'
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ is_premium: true }) // Assuming 'is_premium' is a boolean field
+        .eq('id', authUser.id);
+
+      if (updateError) {
+        console.error('Error upgrading to premium:', updateError.message);
+        return res.status(500).json({ error: 'Failed to upgrade to premium' });
+      }
       
       res.json({ 
         success: true, 
@@ -472,9 +690,9 @@ Respond with JSON in this format:
           'Personalized game statistics'
         ]
       });
-    } catch (error) {
-      console.error('Error upgrading to premium:', error);
-      res.status(500).json({ error: 'Failed to upgrade' });
+    } catch (error: any) {
+      console.error('Error in /api/upgrade/premium:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
