@@ -71,7 +71,11 @@ export function DadQuestionnaire({ onComplete }: DadQuestionnaireProps) {
 
   const handleNext = () => {
     if (isLastQuestion) {
-      onComplete(dadInfo);
+      const finalDadInfo = {
+        ...dadInfo,
+        name: dadInfo.name.trim() === '' ? 'Dad' : dadInfo.name,
+      };
+      onComplete(finalDadInfo);
     } else {
       setCurrentQuestion(currentQuestion + 1);
     }
@@ -88,6 +92,9 @@ export function DadQuestionnaire({ onComplete }: DadQuestionnaireProps) {
   };
 
   const canProceed = () => {
+    if (currentQuestion === 0) {
+      return true;
+    }
     const value = dadInfo[currentQ.key];
     return value && value.toString().trim().length > 0;
   };

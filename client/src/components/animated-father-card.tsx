@@ -14,10 +14,11 @@ interface GeneratedCard {
   signature: string;
   dadAvatar: string; // SVG string
   cardTheme: {
-    primaryColor: string;
-    secondaryColor: string;
-    accentColor: string;
+    primary: string; // Updated to match OpenAI response key
+    secondary: string; // Updated to match OpenAI response key
+    accent: string; // Updated to match OpenAI response key
   };
+  openAIEmoji?: string; // Optional: for the emoji from OpenAI
 }
 
 export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCardProps) {
@@ -31,47 +32,62 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
 
   const generateCard = async () => {
     setIsGenerating(true);
-    
+    const localDadAvatar = generateDadAvatar(dadInfo); // Generate avatar locally
+
     try {
-      const response = await fetch('/api/generate-animated-card', {
+      const response = await fetch('/api/generate-card', { // Changed endpoint
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadInfo),
       });
 
       if (response.ok) {
-        const card = await response.json();
-        setGeneratedCard(card);
+        const openAICard = await response.json();
+        // Combine OpenAI content with local avatar
+        setGeneratedCard({
+          frontMessage: openAICard.title, // Use title from OpenAI
+          insideMessage: openAICard.message, // Use message from OpenAI
+          dadAvatar: localDadAvatar, // Use locally generated avatar
+          cardTheme: openAICard.colors, // Use colors from OpenAI
+          signature: "Love, Your Favorite Child 😉", // Or keep as "Love, Kevin"
+          openAIEmoji: openAICard.animation, // Store emoji
+        });
       } else {
-        setGeneratedCard(generateFallbackCard(dadInfo));
+        // API error, use fallback but with local avatar
+        setGeneratedCard(generateFallbackCard(dadInfo, localDadAvatar));
       }
     } catch (error) {
-      setGeneratedCard(generateFallbackCard(dadInfo));
+      // Network or other error, use fallback with local avatar
+      setGeneratedCard(generateFallbackCard(dadInfo, localDadAvatar));
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const generateFallbackCard = (info: DadInfo): GeneratedCard => {
+  const generateFallbackCard = (info: DadInfo, avatar: string): GeneratedCard => {
     const themes = {
-      funny: { primaryColor: '#FF6B6B', secondaryColor: '#4ECDC4', accentColor: '#45B7D1' },
-      serious: { primaryColor: '#2C3E50', secondaryColor: '#3498DB', accentColor: '#E74C3C' },
-      adventurous: { primaryColor: '#E67E22', secondaryColor: '#27AE60', accentColor: '#F39C12' },
-      gentle: { primaryColor: '#8E44AD', secondaryColor: '#16A085', accentColor: '#E91E63' }
+      funny: { primary: '#FF6B6B', secondary: '#4ECDC4', accent: '#45B7D1' },
+      serious: { primary: '#2C3E50', secondary: '#3498DB', accent: '#E74C3C' },
+      adventurous: { primary: '#E67E22', secondary: '#27AE60', accent: '#F39C12' },
+      gentle: { primary: '#8E44AD', secondary: '#16A085', accent: '#E91E63' }
     };
-
-    const dadName = info.name === 'Dad' ? 'Dad' : info.name;
-    const dadAvatar = generateDadAvatar(info);
     
+    // Fallback witty message incorporating dadInfo
+    const hobby = info.favoriteHobby || "being awesome";
+    const personalityTrait = info.personality || "unique";
+    const fallbackMessage = `Hey ${info.name === 'Dad' ? 'Dad' : info.name}, even though our fancy AI is on a coffee break, we know you're incredible! Happy Father's Day to the coolest dad, master of ${hobby} and purveyor of fine ${personalityTrait} moments! You're the best (even if our robots are slacking)!`;
+
     return {
       frontMessage: 'Happy Father\'s Day!',
-      insideMessage: `${dadName}, your ${info.personality} spirit and love for ${info.favoriteHobby} always brightens our days. Your ${info.specialTrait} makes you truly one-of-a-kind, and moments like ${info.favoriteMemory} remind me how lucky we are to have you. Thank you for being an amazing father!`,
-      signature: 'Love, Kevin',
-      dadAvatar,
-      cardTheme: themes[info.personality]
+      insideMessage: fallbackMessage,
+      signature: 'Love, Your Favorite Child 😉',
+      dadAvatar: avatar, // Use provided avatar
+      cardTheme: themes[info.personality] || themes.gentle,
+      openAIEmoji: '🎉', // Default emoji for fallback
     };
   };
 
+  // This function is now defined outside generateCard if it's called by both
   const generateDadAvatar = (info: DadInfo): string => {
     return `
       <svg width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -159,8 +175,8 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
               className="absolute inset-0 w-full h-full rounded-2xl shadow-2xl overflow-hidden border-4"
               style={{
                 backfaceVisibility: 'hidden',
-                background: `linear-gradient(135deg, ${generatedCard.cardTheme.primaryColor}, ${generatedCard.cardTheme.secondaryColor})`,
-                borderColor: generatedCard.cardTheme.primaryColor
+                background: `linear-gradient(135deg, ${generatedCard.cardTheme.primary}, ${generatedCard.cardTheme.secondary})`,
+                borderColor: generatedCard.cardTheme.primary
               }}
             >
               <div className="h-full p-8 flex flex-col items-center justify-center text-center relative">
@@ -193,39 +209,42 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',
-                borderColor: generatedCard.cardTheme.primaryColor
+                borderColor: generatedCard.cardTheme.primary
               }}
             >
               <div className="h-full flex">
-                {/* Left side - Decorative */}
+                {/* Left side - Avatar */}
                 <div 
-                  className="w-1/3 p-6 flex items-center justify-center"
+                  className="w-1/3 p-6 flex flex-col items-center justify-center"
                   style={{ 
-                    background: `linear-gradient(180deg, ${generatedCard.cardTheme.secondaryColor}, ${generatedCard.cardTheme.accentColor})` 
+                    background: `linear-gradient(180deg, ${generatedCard.cardTheme.secondary}, ${generatedCard.cardTheme.accent})`
                   }}
                 >
-                  <div className="text-center">
-                    <div className="text-6xl text-white/80 mb-4">🎉</div>
-                    <div className="text-2xl text-white/80">❤️</div>
-                  </div>
+                  <div
+                    className="w-40 h-40 rounded-full bg-white p-2 shadow-md overflow-hidden"
+                    dangerouslySetInnerHTML={{ __html: generatedCard.dadAvatar }}
+                  />
+                  {generatedCard.openAIEmoji && (
+                    <div className="mt-2 text-white text-3xl drop-shadow-md">{generatedCard.openAIEmoji}</div>
+                  )}
                 </div>
                 
                 {/* Right side - Message */}
-                <div className="w-2/3 p-4 flex flex-col justify-between">
-                  <div className="flex-1 flex items-center">
-                    <div className="text-gray-800 text-sm leading-relaxed font-medium break-words hyphens-auto overflow-hidden">
+                <div className="w-2/3 p-4 flex flex-col justify-between bg-white"> {/* Ensure message area has white background */}
+                  <div className="flex-1 flex items-center justify-center"> {/* Centering text */}
+                    <div className="text-gray-800 text-base leading-relaxed font-medium break-words hyphens-auto overflow-y-auto max-h-[300px] p-2 text-center"> {/* Added text-center and max-h */}
                       {generatedCard.insideMessage}
                     </div>
                   </div>
                   
                   {/* Signature */}
-                  <div className="border-t-2 pt-3 mt-3" style={{ borderColor: generatedCard.cardTheme.accentColor }}>
+                  <div className="border-t-2 pt-3 mt-3" style={{ borderColor: generatedCard.cardTheme.accent }}>
                     <div className="text-right">
-                      <p className="text-lg font-bold mb-1" style={{ color: generatedCard.cardTheme.primaryColor }}>
-                        Love,
+                      <p className="text-lg font-bold mb-1" style={{ color: generatedCard.cardTheme.primary }}>
+                        {generatedCard.signature.split(',')[0]},
                       </p>
-                      <p className="text-xl font-bold" style={{ color: generatedCard.cardTheme.accentColor }}>
-                        Kevin
+                      <p className="text-xl font-bold" style={{ color: generatedCard.cardTheme.accent }}>
+                        {generatedCard.signature.split(',')[1]?.trim()}
                       </p>
                     </div>
                   </div>
@@ -260,11 +279,12 @@ export function AnimatedFatherCard({ dadInfo, onCardComplete }: AnimatedFatherCa
           <details>
             <summary className="cursor-pointer font-medium">Card Generation Details</summary>
             <div className="mt-2 space-y-1">
-              <p><strong>System:</strong> Free card generation (no OpenAI dependency)</p>
+              <p><strong>System:</strong> OpenAI Powered Card (gpt-4o)</p>
               <p><strong>Dad Name:</strong> {dadInfo.name === 'Dad' ? 'Dad' : dadInfo.name}</p>
-              <p><strong>Personality:</strong> {dadInfo.personality}</p>
-              <p><strong>Template:</strong> Personalized message based on {dadInfo.personality} personality with {dadInfo.favoriteHobby} hobby integration</p>
-              <p><strong>Avatar:</strong> SVG generated with personality-specific features</p>
+              <p><strong>Personality Input:</strong> {dadInfo.personality}</p>
+              <p><strong>Hobby Input:</strong> {dadInfo.favoriteHobby}</p>
+              <p><strong>Avatar:</strong> Locally generated SVG with personality features</p>
+              <p><strong>Theme Colors:</strong> Primary: {generatedCard.cardTheme.primary}, Secondary: {generatedCard.cardTheme.secondary}, Accent: {generatedCard.cardTheme.accent}</p>
             </div>
           </details>
         </motion.div>

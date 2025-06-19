@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 
 interface EnvelopeAnimationProps {
   onComplete: () => void;
+  dadName: string;
 }
 
-export function EnvelopeAnimation({ onComplete }: EnvelopeAnimationProps) {
+export function EnvelopeAnimation({ onComplete, dadName }: EnvelopeAnimationProps) {
   const [stage, setStage] = useState<'sealed' | 'opening' | 'opened'>('sealed');
 
   const handleEnvelopeClick = () => {
@@ -38,14 +39,26 @@ export function EnvelopeAnimation({ onComplete }: EnvelopeAnimationProps) {
         >
           {/* Envelope Base */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-amber-100 to-amber-200 border-2 border-amber-300 rounded-lg"
+            className="absolute inset-0 bg-gradient-to-br from-amber-100 to-amber-200 border-2 border-amber-300 rounded-lg flex items-center justify-center" // Added flex centering
             initial={{ rotateY: 0 }}
             animate={{ 
               rotateY: stage === 'opened' ? 15 : 0,
               scale: stage === 'opened' ? 1.1 : 1
             }}
             transition={{ duration: 1 }}
-          />
+          >
+            {stage === 'sealed' && (
+              <motion.div
+                className="text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 1 }}
+              >
+                <div className="text-amber-700 font-serif italic text-xl transform -rotate-3">To:</div>
+                <div className="text-amber-800 font-serif italic text-3xl font-semibold transform -rotate-3">{dadName}</div>
+              </motion.div>
+            )}
+          </motion.div>
           
           {/* Envelope Flap */}
           <motion.div
